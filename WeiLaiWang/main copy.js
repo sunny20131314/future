@@ -20,31 +20,24 @@ import WebViewCom from './webView';
 import BdHd from './bd-hd';
 import Ad from './ad';
 import SearchComponent from './search';
-import DragBtnContainer from './dragBtn';
 import DeliveryBtn from './deliveryBtn';
 import BdBtm from './bd-btm';
 
-var DeliveryArr = [
-  {id: 'yuantong', val: '圆通'},
-  {id: 'yunda', val: '韵达'},
-  {id: 'shentong', val: '申通'},
-  {id: 'zhongtong', val: '中通'},
-  {id: 'shunfeng', val: '顺丰'},
-  {id: 'ems', val: 'EMS'},
-  {id: 'zhaijisong', val: '宅急送'},
-  {id: 'quanfengkuaidi', val: '全峰'},
-  {id: 'tiantian', val: '天天'},
-  {id: 'youshuwuliu', val: '优速'},
-  {id: 'rufengda', val: '如风达'},
-  {id: 'youzhengguonei', val: '包裹'}
-];
+
+
+
+// 测试会否导出
+import { NativeModules } from 'react-native';
+var BGNativeModuleExample = NativeModules.BGNativeModuleExample;
+console.log(BGNativeModuleExample);
+
 
 export default class Main extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isRefreshing: true,
+      isRefreshing: false,
       activeBtn: 'yuantong'
     }
   }
@@ -55,7 +48,7 @@ export default class Main extends Component {
 
   render() {
     // 45 是头部导航栏的高度
-    let {height} = Dimensions.get('window');
+    var {height} = Dimensions.get('window');
     // ios, android 的头部宽度(即)
     var _scrollView = ScrollView;
     return (
@@ -64,7 +57,6 @@ export default class Main extends Component {
         <ScrollView
           ref={(scrollView) => { _scrollView = scrollView; }}
           style={[styles.scrollView, {height: height-72 }]}
-          alwaysBounceHorizontal={false}
           refreshControl={
             <RefreshControl
               refreshing={this.state.isRefreshing}
@@ -82,33 +74,6 @@ export default class Main extends Component {
           </View>
 
 
-          {
-            // 跳转搜索
-          }
-          <TouchableHighlight
-            activeOpacity={.8}
-            onPress={this._onJumpDrag.bind(this)}
-            underlayColor="rgba(255, 255, 255, 0.6)"
-            style={{
-               width: 86,
-               marginLeft: 16,
-               paddingLeft: 24,
-               paddingRight: 24,
-               paddingTop: 6,
-               paddingBottom: 6,
-               borderWidth: 1,
-               borderColor: '#ededed',
-               borderRadius: 4,
-              }}
-          >
-            <Text style={{fontSize: 18, color: '#ff5248',}}>
-              点击跳转拖动页面
-            </Text>
-          </TouchableHighlight>
-
-          {
-            // 快递页面
-          }
           <View>
             <TouchableHighlight
               activeOpacity={.8}
@@ -130,19 +95,9 @@ export default class Main extends Component {
                 快递
               </Text>
             </TouchableHighlight>
-            <SearchComponent placeholder="请输入快递单号..." keyboardType='numeric' onSearch={this._onSearchDelivery.bind(this)}/>
-            <View style={styles.deliveryBtns}>
-              {
-                DeliveryArr.map((arr) => <DeliveryBtn
-                  id={arr.id}
-                  val={arr.val}
-                  key={arr.id}
-                  activeBtn={this.state.activeBtn}
-                  setType={this._setType.bind(this)}
-                />)
-              }
-            </View>
+            <DeliveryBtn onSearch={(url) => _onSearch(url)}/>
           </View>
+
           <Ad />
           <BdBtm />
         </ScrollView>
@@ -158,26 +113,6 @@ export default class Main extends Component {
         </TouchableOpacity>
       </View>
     );
-  }
-
-  componentDidMount() {
-    // 加载数据-刷新
-    setTimeout(() => {
-      this.setState({
-        isRefreshing: false
-      });
-    }, 2000);
-  }
-
-  _onJumpDrag() {
-    const { navigator } = this.props;
-    navigator.replace({
-      name: 'drag',
-      component: DragBtnContainer,
-      params: {
-        url: ''
-      }
-    })
   }
 
   _setType(id) {
@@ -203,11 +138,6 @@ export default class Main extends Component {
 
   _onSearchBaiDu(val) {
     this._onSearch( 'http://www.baidu.com/s?wd=' + val );
-  }
-
-  _onSearchDelivery(val) {
-    // 检测数据类型为 number --
-    this._onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
   }
 
   _onRefresh() {
@@ -237,14 +167,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomColor: '#d8d8d8',
     borderBottomWidth: 1,
-  },
-  deliveryBtns: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginTop: 15,
-    marginBottom: 15,
   },
   goTop: {
     position: 'absolute',

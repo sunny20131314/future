@@ -17,12 +17,14 @@ import header from './header';
 export default class RouteComponent extends React.Component {
   render() {
     let ROUTE_STACK = [
-      {name: 'main', component: main, index: 0},
-      {name: 'header', component: header, index: 1}
+      {name: 'main', component: main, index: 0}
     ];
     let INIT_ROUTE_INDEX = 0;
     return (
       <Navigator
+        style={{
+          paddingTop: 20
+          }}
         initialRouteStack={
           // initialRouteStack:
           // 提供一个路由集合用来初始化。如果没有设置初始路由的话则必须设置该属性。

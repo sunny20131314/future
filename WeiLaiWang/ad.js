@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   TouchableHighlight,
   Image,
@@ -48,5 +47,7 @@ const styles = StyleSheet.create({
   },
   ad: {
     height: 77,
+    marginTop: 12,
+    marginBottom: 12,
   }
 });

@@ -11,18 +11,16 @@ import {
   View
 } from 'react-native';
 
-import main from './main';
-import header from './header';
-import css from './css';
+import Main from './main';
+import DragBtn from './dragBtn';
 
 export default class RouteComponent extends React.Component {
   render() {
     let ROUTE_STACK = [
-      {name: 'main', component: main, index: 0},
-      {name: 'header', component: header, index: 1},
-      {name: 'css', component: css, index: 2}
+      //{name: 'main', component: Main, index: 0},
+      {name: 'DragBtn', component: DragBtn, index: 1}
     ];
-    let INIT_ROUTE_INDEX = 0;
+    let INIT_ROUTE_INDEX = 1;
     return (
       <Navigator
         style={{

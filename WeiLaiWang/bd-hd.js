@@ -210,7 +210,6 @@ const styles = StyleSheet.create({
   hd: {
     flex: 1,
     marginTop: 16,
-    marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff'

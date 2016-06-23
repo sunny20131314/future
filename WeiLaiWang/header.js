@@ -4,10 +4,8 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   TouchableHighlight,
-  Navigator,
   Image,
   Text,
   View

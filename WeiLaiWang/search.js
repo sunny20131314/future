@@ -4,9 +4,8 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
-  ScrollView,
+  Alert,
   TouchableHighlight,
   TextInput,
   Text,
@@ -14,68 +13,89 @@ import {
   View
 } from 'react-native';
 
-export default class searchBaiDu extends Component {
+export default class SearchComponent extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      text: '',
-      isRefreshing: false
+      text: ''
     }
   }
 
-  static propTypes = {
-    navigator: React.PropTypes.object.isRequired
-  };
-
   render() {
-    var _scrollView = ScrollView;
     return (
       <View style={styles.container}>
-        <TextInput
-          placeholder={this.props.placeholder}
-          onChangeText={(text) => this.setState({text})}
-          value={this.state.text}
-          onSubmitEditing={this.submit.bind(this)}
-        />
+        <View style={styles.searchInputContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder={this.props.placeholder}
+            value={this.state.text}
+            keyboardType={this.props.keyboardType}
+            onChangeText={(text) => this.setState({text})}
+            onSubmitEditing={this._submit.bind(this)}
+          />
+        </View>
         <TouchableHighlight
           activeOpacity={.8}
-          onPress={() => console.log('press')}
+          onPress={this._submit.bind(this)}
           underlayColor="rgba(255, 255, 255, 0.6)"
-          style={styles.hdBottomItem}
+          style={styles.searchBtn}
         >
-          <Text>
-            星座
-          </Text>
+          <Image
+            source={require('./img/search.gif')}
+            style={styles.searchPic}
+            resizeMode='contain'
+          />
         </TouchableHighlight>
       </View>
     );
   }
 
-  submit() {
-    console.log(this.state.text, 'http://www.baidu.com/s?wd=' + this.state.text);
+  _submit() {
+    console.log(this.state.text);
+    this.state.text
+      ? this.props.onSearch( this.state.text)
+      : Alert.alert(
+          '提示: ',
+          '请输入相关内容!'
+        );
   }
 }
 
 
 const styles = StyleSheet.create({
   container: {
-    margin: 0,
-    flexDirection: 'column',
+    marginTop: 8,
+    marginBottom: 8,
+    marginLeft: 15,
+    marginRight: 15,
+    flexDirection: 'row',
     backgroundColor: '#fff'
   },
-  scrollView: {
-    flex:1,
-    backgroundColor: '#fff',
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingLeft: 10,
+    borderWidth: 1,
+    borderColor: '#afafaf',
+    borderRadius: 6,
   },
-  goTop: {
-    position: 'absolute',
-    top: 10,
-    right: 60,
+  searchInput: {
+    flex: 1,
+    padding: 0,
+    borderWidth: 0,
   },
-  goTopImg: {
-    width: 24,
-    height: 24,
+  searchBtn: {
+    width: 65,
+    height: 36,
+    marginLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ff5248',
+    borderRadius: 6,
+  },
+  searchPic: {
+    height: 36,
   },
 });
 
