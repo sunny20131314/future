@@ -1,5 +1,6 @@
 /**
  * Created by sunzhimin on 16/6/20.
+ * 打算把所有的 btn 一个个写出来
  */
 
 import React, { Component } from 'react';

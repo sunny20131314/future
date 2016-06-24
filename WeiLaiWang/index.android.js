@@ -12,15 +12,17 @@ import {
 } from 'react-native';
 
 import main from './main';
-import header from './header';
+import DragBtn from './dragBtn';
+import DragReg from './dragReg';
 
 export default class RouteComponent extends React.Component {
   render() {
     let ROUTE_STACK = [
       {name: 'main', component: main, index: 0},
-      {name: 'header', component: header, index: 1}
+      {name: 'DragBtn', component: DragBtn, index: 1},
+      {name: 'DragReg', component: DragReg, index: 2}
     ];
-    let INIT_ROUTE_INDEX = 0;
+    let INIT_ROUTE_INDEX = 2;
     return (
       <Navigator
         initialRouteStack={

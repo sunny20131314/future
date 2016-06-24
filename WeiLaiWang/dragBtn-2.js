@@ -107,79 +107,9 @@ class DragBtn extends Component {
 
 
   componentWillMount(){
-    this._gestureHandlers = {
-      onStartShouldSetResponder: () => true,
-      onMoveShouldSetResponder: ()=> true,
-      onResponderGrant: ()=> {
-        this._top = this.state.top;
-        this._left = this.state.left;
-      },
-      onResponderMove: (evt)=> {
-        let nativeEvt = evt.nativeEvent;
-        console.log(nativeEvt.pageX, nativeEvt.pageY);
-
-        // 虚拟占位
-        judgeIndex(nativeEvt.pageX, nativeEvt.pageY);
-        let index = judgeNum;
-        console.log(index, '移动中的index');
-
-        this.setState({
-          position: 'absolute',
-          left: nativeEvt.pageX - width / 2,
-          top: nativeEvt.pageY - height / 2,
-          index: index
-        });
-
-        // 仅仅是第一次执行!  记录当前拖动中的数据
-        if (this.state.first) {
-          console.log(this.state.first, 'true~~~~~~');
-
-          this.setState({
-            first: false,
-            oriIndex: index
-          })
-        }
-
-        if (this.state.index === index) {
-          return false;
-        }
-        console.log(this.state.oriIndex, '移动中的 oriIndex');
-
-        console.log(this.state.index, '移动到的位置');
-
-        // 拖动过程中,总数据不变,当前拖动元素绝对定位,
-        // 添加空数据,一个虚拟定位
-        dragingAllData = dragDate.slice(0);
-        dragingAllData.splice(index, 0, dragingInstead);
-        this.props.onDraging(dragingAllData);
-      },
-      onResponderRelease: ()=> {
-        console.warn('松手啦~~~');
-        // 把拖动的数据,替换到当前位置
-        let oriIndex = this.state.oriIndex;
-        let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
-
-        let index = this.state.index;
-        dragDate.splice(index, 0, dragingData[0]);
-
-        this.props.onDragEnd(dragDate);
-
-        this.setState({
-            position: 'relative',
-            top: 0,
-            left: 0
-          }
-        );
-        // 储存 dragDate 数据 --
-
-      }
-    };
-
     this._panResponder = PanResponder.create({
-      //           {...this._panResponder.panHandlers}
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: ()=> true,
-      onResponderTerminationRequest: (evt) => false,
       onPanResponderGrant: ()=>{
 
         // 每一个拖动的数据!
@@ -253,7 +183,7 @@ class DragBtn extends Component {
     if( borderWidth ) {
       return (
         <View
-          {...this._gestureHandlers}
+          {...this._panResponder.panHandlers}
           style={[styles.textContainer, {borderWidth: borderWidth,}]}>
           <Text>
             试试放开手~~
@@ -264,7 +194,7 @@ class DragBtn extends Component {
 
     return (
       <View
-        {...this._gestureHandlers}
+        {...this._panResponder.panHandlers}
         style={[styles.imgContainer,{
             position: this.state.position,
             top: this.state.top,

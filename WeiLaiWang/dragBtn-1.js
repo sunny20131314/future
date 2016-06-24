@@ -1,6 +1,7 @@
 /**
  * Created by sunzhimin on 16/6/23.
  * 可以拖动排序的组件
+ * 可用,但是可以简化,比如位置啊, index
  */
 
 import React, { Component } from 'react';
@@ -53,6 +54,7 @@ var dragDate = [
     href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
   }
 ]; // 全部数据
+var dragDateLen = dragDate.length;
 var dragingAllData; // 拖动后剩下的数据
 var dragingInstead = {url: ''};  //占位的数据
 
@@ -60,35 +62,49 @@ var baseHeight = 0;  // 手机自带导航栏的高度
 
 // 相应的坐标值
 var siteArr = [];
+var height1 = baseHeight + height + 4;
+var height2 = baseHeight + (height+ 4) * 2 ;
+var height3 = baseHeight + (height+ 4) * 3;
+var height4 = baseHeight + (height+ 4) * 4;
+var width2 = width + 4;
 
-// 高度对应
-var dragDateLen = dragDate.length;
-for ( let i = 0; i !== dragDateLen + 2; i++) {
+// 高度对应  --
+for ( let i = 0; i !== dragDateLen; i++) {
   let res = i % 2;  // 0 or 1
   let multiple = Math.floor(i/2); //高度倍率
   //console.log( multiple, res );
   let h = baseHeight + (height + 4) * multiple ;
   let w = res ? width + 4 : 0 ;
   siteArr[i] = {
-    left: w,
-    top: h
+    width: w,
+    height: h
   }
 }
 console.log( siteArr );
 
-// 是判断触摸的范围
-var judgeNum;    // -- 目前只能通过外部变量去保存当前触摸的位置,更好的方式~~~
-function judgeIndex(w, h, i=0) {
-  let numH = i+2;
 
-  if(h < siteArr[numH].top){
-    return judgeNum = w < siteArr[i+1].left ? i : i+1;
+var judgePosition = function(w, h) {
+
+  // 判断当前位置,通过判断触摸点的位置!
+  let index;
+
+  //console.log(w, h);
+  //console.log('judge', width, height);
+
+  if( h < height1 ) {
+    index = w < width ? 0 : 1;
   }
-  else if( h > siteArr[dragDateLen].top ){  // 当超出容器底部时
-    return judgeNum = w < siteArr[dragDateLen+1].left ? dragDateLen-2 : dragDateLen-1;
+  else if (h < height2 ) {
+    index = w < width ? 2 : 3;
   }
-  judgeIndex( w, h, numH );
-}
+  else if (h < height3) {
+    index = w < width ? 4 : 5;
+  }
+  else {
+    index = w < width ? 6 : 7;
+  }
+  return index;
+};
 
 class DragBtn extends Component {
   constructor(props) {
@@ -107,94 +123,63 @@ class DragBtn extends Component {
 
 
   componentWillMount(){
-    this._gestureHandlers = {
-      onStartShouldSetResponder: () => true,
-      onMoveShouldSetResponder: ()=> true,
-      onResponderGrant: ()=> {
-        this._top = this.state.top;
-        this._left = this.state.left;
-      },
-      onResponderMove: (evt)=> {
-        let nativeEvt = evt.nativeEvent;
-        console.log(nativeEvt.pageX, nativeEvt.pageY);
-
-        // 虚拟占位
-        judgeIndex(nativeEvt.pageX, nativeEvt.pageY);
-        let index = judgeNum;
-        console.log(index, '移动中的index');
-
-        this.setState({
-          position: 'absolute',
-          left: nativeEvt.pageX - width / 2,
-          top: nativeEvt.pageY - height / 2,
-          index: index
-        });
-
-        // 仅仅是第一次执行!  记录当前拖动中的数据
-        if (this.state.first) {
-          console.log(this.state.first, 'true~~~~~~');
-
-          this.setState({
-            first: false,
-            oriIndex: index
-          })
-        }
-
-        if (this.state.index === index) {
-          return false;
-        }
-        console.log(this.state.oriIndex, '移动中的 oriIndex');
-
-        console.log(this.state.index, '移动到的位置');
-
-        // 拖动过程中,总数据不变,当前拖动元素绝对定位,
-        // 添加空数据,一个虚拟定位
-        dragingAllData = dragDate.slice(0);
-        dragingAllData.splice(index, 0, dragingInstead);
-        this.props.onDraging(dragingAllData);
-      },
-      onResponderRelease: ()=> {
-        console.warn('松手啦~~~');
-        // 把拖动的数据,替换到当前位置
-        let oriIndex = this.state.oriIndex;
-        let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
-
-        let index = this.state.index;
-        dragDate.splice(index, 0, dragingData[0]);
-
-        this.props.onDragEnd(dragDate);
-
-        this.setState({
-            position: 'relative',
-            top: 0,
-            left: 0
-          }
-        );
-        // 储存 dragDate 数据 --
-
-      }
-    };
-
     this._panResponder = PanResponder.create({
-      //           {...this._panResponder.panHandlers}
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: ()=> true,
-      onResponderTerminationRequest: (evt) => false,
       onPanResponderGrant: ()=>{
 
         // 每一个拖动的数据!
         let index = this.props.index;
+        console.warn(index);
+        let top, left;
+        switch (index) {
+          case 0:
+            top = baseHeight;
+            left = 0;
+            break;
+          case 1:
+            top = baseHeight;
+            left = width2;
+            break;
+          case 2:
+            top = height1;
+            left = 0;
+            break;
+          case 3:
+            top = height1;
+            left = width2;
+            break;
+          case 4:
+            top = height2;
+            left = 0;
+            break;
+          case 5:
+            top = height2;
+            left = width2;
+            break;
+          case 6:
+            top = height3;
+            left = 0;
+            break;
+          case 7:
+            top = height3;
+            left = width2;
+            break;
+          default:
+            alert('数据超过8啦,注意!!!')
+        }
 
-        this._top = siteArr[index].top;
-        this._left = siteArr[index].left;
+
+        this._top = this.state.top;
+        this._left = this.state.left;
       },
       onPanResponderMove: (evt,gs)=>{
         let nativeEvt = evt.nativeEvent;
+        //console.log('location',nativeEvt.locationY, nativeEvt.locationX);
+        //console.log(nativeEvt.pageX,nativeEvt.pageY );
 
         // 虚拟占位
-        judgeIndex(nativeEvt.pageX,nativeEvt.pageY);
-        let index = judgeNum;
-        console.log( index, '移动中的index' );
+        let index = judgePosition(nativeEvt.pageX,nativeEvt.pageY);
 
         // 设置当前index, 记录移动的位置!
         this.setState({
@@ -214,19 +199,20 @@ class DragBtn extends Component {
           })
         }
 
+        console.log(this.state.first, 'false~~~~~~');
+
         if( this.state.index === index ){
           return false;
         }
-        console.log( this.state.index, '移动到的位置');
 
         // 拖动过程中,总数据不变,当前拖动元素绝对定位,
         // 添加空数据,一个虚拟定位
         dragingAllData = dragDate.slice(0);
         dragingAllData.splice(index, 0, dragingInstead);
+        //console.log(dragingAllData);
         this.props.onDraging(dragingAllData);
       },
       onPanResponderRelease: (evt,gs)=>{
-        console.warn('松手啦~~~');
         // 把拖动的数据,替换到当前位置
         let oriIndex = this.state.oriIndex;
         let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
@@ -237,14 +223,17 @@ class DragBtn extends Component {
         this.props.onDragEnd(dragDate);
 
         this.setState({
-          position: 'relative',
-          top: 0,
-          left: 0
+          position: 'relative'
         });
 
         // 储存 dragDate 数据 --
       }
     })
+  }
+
+  renderText(borderWidth) {
+    console.log(this.props.url);
+
   }
 
   render() {
@@ -253,10 +242,17 @@ class DragBtn extends Component {
     if( borderWidth ) {
       return (
         <View
-          {...this._gestureHandlers}
-          style={[styles.textContainer, {borderWidth: borderWidth,}]}>
-          <Text>
-            试试放开手~~
+          {...this._panResponder.panHandlers}
+          style={[styles.rect, {alignItems: 'center', justifyContent: 'center'}]}>
+          <Text
+            style={{
+            width: width,
+            height: height,
+            borderWidth: borderWidth,
+            borderColor: '#e8e8e8'
+          }}
+          >
+            试试松开手,可以切换位置哦~~
           </Text>
         </View>
       );
@@ -264,8 +260,8 @@ class DragBtn extends Component {
 
     return (
       <View
-        {...this._gestureHandlers}
-        style={[styles.imgContainer,{
+        {...this._panResponder.panHandlers}
+        style={[styles.rect,{
             position: this.state.position,
             top: this.state.top,
             left: this.state.left,
@@ -298,7 +294,7 @@ export default class DragBtnContainer extends Component {
       data: data
     });
 
-    console.log( '子组件传过来的数据', data );
+    console.log( data );
   }
 
 
@@ -327,23 +323,15 @@ export default class DragBtnContainer extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: 400,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  imgContainer: {
+  rect: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 4,
   },
-  textContainer: {
-    width: width,
-    height: height,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-    borderColor: '#e8e8e8',
-  }
 });
