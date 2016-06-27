@@ -1,6 +1,7 @@
 /**
  * Created by sunzhimin on 16/6/23.
  * 可以拖动排序的组件
+ * 简化后,但是组件的相关还需修改
  */
 
 import React, { Component } from 'react';

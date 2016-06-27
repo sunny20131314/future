@@ -2,7 +2,8 @@
  * Created by sunzhimin on 16/6/23.
  * 可以拖动排序的组件
  * {...this._gestureHandlers} vs {...this._panResponder.panHandlers}
- * 当在当前的位置上时, 表现类似于 添加了一个空数据, 定位 relative
+ *
+ * 完整版本
  */
 
 import React, { Component } from 'react';
@@ -15,8 +16,6 @@ import {
   Text,
   View
 } from 'react-native';
-//import Order from  'react-native-order-children';
-//console.log(Order);
 
 // 计算每个image的大小,高宽和图等比例!
 var {width} = Dimensions.get('window');
@@ -50,23 +49,15 @@ var dragDate = [
   },
   {
     url: require( './img/jiyejia490.png' ),
-    //href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
-    href: 'jiyejia'
+    href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
   },
   {
     url: require( './img/bishengke490.png' ),
-    //href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
-    href: 'bishengke'
+    href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
   }
 ]; // 全部数据
-//dragDate.length = 4;
-var dragDateLen = dragDate.length;
-
-
 var dragingAllData; // 拖动后剩下的数据
-var dragingInstead = {url: '', href: ''};  //占位的数据
-
-//dragDate.push( dragingInstead );
+var dragingInstead = {url: ''};  //占位的数据
 
 var baseHeight = 0;  // 手机自带导航栏的高度
 
@@ -74,6 +65,7 @@ var baseHeight = 0;  // 手机自带导航栏的高度
 var siteArr = [];
 
 // 高度对应
+var dragDateLen = dragDate.length;
 for ( let i = 0; i !== dragDateLen + 2; i++) {
   let res = i % 2;  // 0 or 1
   let multiple = Math.floor(i/2); //高度倍率
@@ -108,7 +100,7 @@ class DragBtn extends Component {
     // top, left 改为当前所在的位置!
     this.state = {
       position: 'relative',
-      top: 0,
+      top: 400,
       left: 0,
       index: '',
       oriIndex: '',
@@ -116,27 +108,92 @@ class DragBtn extends Component {
     }
   }
 
+
   componentWillMount(){
+    this._gestureHandlers = {
+      onStartShouldSetResponder: () => true,
+      onMoveShouldSetResponder: ()=> true,
+      onResponderGrant: ()=> {
+        this._top = this.state.top;
+        this._left = this.state.left;
+      },
+      onResponderMove: (evt)=> {
+        let nativeEvt = evt.nativeEvent;
+        console.log(nativeEvt.pageX, nativeEvt.pageY, '移动中的位置');
+
+        // 虚拟占位
+        judgeIndex(nativeEvt.pageX, nativeEvt.pageY);
+        let index = judgeNum;
+        console.log(index, '移动中的index');
+
+        this.setState({
+          position: 'absolute',
+          left: nativeEvt.pageX - width / 2,
+          top: nativeEvt.pageY - height / 2,
+          index: index
+        });
+
+        // 仅仅是第一次执行!  记录当前拖动中的数据
+        if (this.state.first) {
+          console.log(this.state.first, 'true~~~~~~');
+
+          this.setState({
+            first: false,
+            oriIndex: index
+          })
+        }
+
+        if (this.state.index === index) {
+          return false;
+        }
+        console.log(this.state.oriIndex, '移动中的 oriIndex');
+
+        console.log(this.state.index, '移动到的位置');
+
+        // 拖动过程中,总数据不变,当前拖动元素绝对定位,
+        // 添加空数据,一个虚拟定位
+        dragingAllData = dragDate.slice(0);
+        dragingAllData.splice(index, 0, dragingInstead);
+        this.props.onDraging(dragingAllData);
+      },
+      onResponderRelease: ()=> {
+        console.warn('松手啦~~~');
+        // 把拖动的数据,替换到当前位置
+        let oriIndex = this.state.oriIndex;
+        let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
+
+        let index = this.state.index;
+        dragDate.splice(index, 0, dragingData[0]);
+
+        this.props.onDragEnd(dragDate);
+
+        this.setState({
+            position: 'relative',
+            top: 0,
+            left: 0
+          }
+        );
+        // 储存 dragDate 数据 --
+
+      }
+    };
+
     this._panResponder = PanResponder.create({
-      //要求成为响应者：
-      //类似 shouldComponentUpdate，监听手势开始按下的事件，返回一个boolean决定是否启用当前手势响应器
-      onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder.bind(this),
-
-      //监听手势移动的事件，返回一个boolean决定是否启用当前手势响应器
-      onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder.bind(this),
-
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: ()=> true,
       onResponderTerminationRequest: (evt) => false,
-
-      //响应对应事件后的处理:
       onPanResponderGrant: ()=>{
 
-        // 每一个拖动的数据!  没有使用
+        // 每一个拖动的数据!
         let index = this.props.index;
+
+        this._top = siteArr[index].top;
+        this._left = siteArr[index].left;
       },
       onPanResponderMove: (evt,gs)=>{
         let nativeEvt = evt.nativeEvent;
-        //console.log(nativeEvt.pageX,nativeEvt.pageY, 'page');
-        console.log(this.props.href);
+        console.log(gs.dy, gs.x0,gs.y0, gs, 'gs');
+
         // 虚拟占位
         judgeIndex(nativeEvt.pageX,nativeEvt.pageY);
         let index = judgeNum;
@@ -148,114 +205,81 @@ class DragBtn extends Component {
           top: nativeEvt.pageY - height / 2,
           index: index
         });
+        //
+        //this.setState({
+        //  position: 'absolute',
+        //  top: this._top+gs.dy,
+        //  left: this._left+gs.dx,
+        //  index: index
+        //});
 
-        // 仅仅是第一次执行!  记录当前拖动中的数据排序
+        // 仅仅是第一次执行!  记录当前拖动中的数据
         if( this.state.first ) {
+          console.log(this.state.first, 'true~~~~~~');
+
           this.setState({
             first: false,
-            oriIndex: this.props.index
+            oriIndex: index
           })
         }
 
         console.log( this.state.oriIndex, this.state.index, index, '移动到的上一位置及当前');
 
-        console.log('change111');
+        if( this.state.index !== index ){
 
-        // 拖动过程中,总数据不变,当前拖动元素绝对定位,
-        // 添加空数据,一个虚拟定位
-        dragingAllData = dragDate.slice(0);
-        dragingAllData.splice(index+1, 0, dragingInstead);
-        console.log(dragingAllData, 'ondraging');
-
-        this.props.onDraging(dragingAllData);
+          // 拖动过程中,总数据不变,当前拖动元素绝对定位,
+          // 添加空数据,一个虚拟定位
+          dragingAllData = dragDate.slice(0);
+          dragingAllData.splice(index, 0, dragingInstead);
+          this.props.onDraging(dragingAllData);
+        }
       },
       onPanResponderRelease: (evt,gs)=>{
         console.info('松手啦~~~');
-        this._handlePanResponder();
-      },
+        // 把拖动的数据,替换到当前位置
+        let oriIndex = this.state.oriIndex;
+        let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
 
-      //另一个组件成了手势响应器时（当前组件手势结束）的处理
-      onPanResponderTerminate: (evt, gestureState) => {
-        console.log( '另一个组件已经成为了新的响应者' );
-        this._handlePanResponder();
+        let index = this.state.index;
+        dragDate.splice( index, 0, dragingData[0] );
+
+        this.props.onDragEnd(dragDate);
+
+        this.setState({
+          position: 'relative',
+          top: 0,
+          left: 0
+        });
+
+        // 储存 dragDate 数据 --
       }
-
     })
   }
 
-  _handlePanResponder() {
-    console.log('handle11111~~~~ end11111~~~');
-    let oriIndex = this.state.oriIndex;
-    let index = this.state.index;
-
-    console.log(oriIndex, index);
-
-    // 如果数据移动到同一位置时
-    //if( index !== oriIndex ){
-      // 把拖动的数据,替换到当前位置
-      let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
-      dragDate.splice( index, 0, dragingData[0] );
-    //}
-
-    this.props.onDragEnd(dragDate);
-
-    //在整个数组位置变动后, 又是一个新的数组, 所以需要把first标记为true
-    this.setState({
-      position: 'relative',
-      top: 0,
-      left: 0,
-      first: true,
-    });
-
-    // 储存 dragDate 数据 --
-  }
-
-  _handleStartShouldSetPanResponder(evt, gestureState) {
-    //let nativeEvt = evt.nativeEvent;
-    //console.log(nativeEvt, gestureState, 'Start');
-    //返回一个boolean决定是否启用当前手势响应器
-    return true;
-  }
-  _handleMoveShouldSetPanResponder(evt, gestureState) {
-    //console.log(evt, gestureState, 'Move');
-    return true;
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState.top !== this.state.top
-    || nextState.left !== this.state.left
-    || nextState.position !== this.state.position
-    || nextProps.url !== this.props.url;
-  }
-
-
   render() {
-    console.log( '子组件render~~~~' );
     let borderWidth = this.props.url ? 0 : 1;
 
     if( borderWidth ) {
       return (
         <View
-          style={[styles.textContainer, {
-            borderWidth: borderWidth,
-          }]}>
+          {...this._panResponder.panHandlers}
+          style={[styles.textContainer, {borderWidth: borderWidth,}]}>
           <Text>
-            放开这个菇凉~~
+            试试放开手~~
           </Text>
         </View>
       );
     }
 
-    //console.log(style);
-
     return (
       <View
         {...this._panResponder.panHandlers}
-        style={[styles.imgContainer, {
-          position: this.state.position,
-          top: this.state.top,
-          left: this.state.left
-        }]}>
+
+        style={[styles.imgContainer,{
+            position: this.state.position,
+            top: this.state.top,
+            left: this.state.left,
+          }]}>
         <Image
           source={this.props.url}
           style={{
@@ -280,32 +304,17 @@ export default class DragBtnContainer extends Component {
 
 
   _onDrag(data) {
-    console.log( '子组件传过来的数据', data );
-
     this.setState({
       data: data
     });
+
+    console.log( '子组件传过来的数据', data );
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    let data = this.state.data;
-    let nextData = nextState.data;
-    let isAlter = false;
-    if( data.length !== nextData.length ){
-      return true;
-    }
-    for( var n = 0, len = data.length; n !== len; n++ ){
-      if( data[n] !== nextData[n] ){
-        return isAlter = true;
-      }
-    }
-    return isAlter;
-  }
 
   render() {
     let dragDates = this.state.data;
     console.log('当前遍历的数据', dragDates);
-    console.info( 'render' );
     return (
       <View style={[styles.container]}>
         {
@@ -313,7 +322,6 @@ export default class DragBtnContainer extends Component {
             return (
               <DragBtn
                 url={data.url}
-                href={data.href}
                 key={'item' + i}
                 index={i}
                 onDraging={this._onDrag.bind(this)}
@@ -346,7 +354,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
-    //borderColor: '#e8e8e8',
-    borderColor: '#000',
+    borderColor: '#e8e8e8',
   }
 });
