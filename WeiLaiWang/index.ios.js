@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 
 //import InitialRouter from './initialRouter';
-import DragBtn from './dragBtn-nospace';
+//import DragBtn from './dragBtn-nospace';
+import DragBtn from './dragBtn.new';
 //import DragReg from './dragReg';
 
-let MyComponent = require('./dragBtn');
+//let MyComponent = require('./dragBtn');
 
 class TestMore extends Component {
   render() {

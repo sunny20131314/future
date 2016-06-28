@@ -16,14 +16,12 @@ import {
   Text,
   View
 } from 'react-native';
-//import Order from  'react-native-order-children';
-//console.log(Order);
 
 // 计算每个image的大小,高宽和图等比例!
+
 var {width} = Dimensions.get('window');
 width = (width-4)/2;
 var height = width/490*245;
-
 
 let data = {
   hello: {text: 'world'},
@@ -86,7 +84,6 @@ var dragDate = [
 ]; // 全部数据
 //dragDate.length = 4;
 var dragDateLen = dragDate.length;
-
 
 var dragingAllData; // 拖动后剩下的数据
 var dragingInstead = {url: '', href: ''};  //占位的数据
@@ -261,25 +258,22 @@ export default class DragBtnContainer extends Component {
       expert: expert,
       position: position,
       top: top,
-      left: left,
+      left: left
     })
   }
-  shouldComponentUpdate(nextProps, nextState) {
-    let data = this.state.data;
-    let nextData = nextState.data;
-    let isAlter = true;
-    if( data.length !== nextData.length ){
-      return isAlter;
-    }
-    //for( var n = 0, len = data.length; n !== len; n++ ){
-    //  console.log(1, data[n] !== nextData[n]);
-    //  if( data[n] !== nextData[n] ){
-    //    console.log(11);
-    //    return isAlter = true;
-    //  }
-    //}
-    return isAlter;
-  }
+  //shouldComponentUpdate(nextProps, nextState) {
+  //  let data = this.state.data;
+  //  let nextData = nextState.data;
+  //  let isAlter = true;
+  //  //for( var n = 0, len = data.length; n !== len; n++ ){
+  //  //  console.log(1, data[n] !== nextData[n]);
+  //  //  if( data[n] !== nextData[n] ){
+  //  //    console.log(11);
+  //  //    return isAlter = true;
+  //  //  }
+  //  //}
+  //  return isAlter;
+  //}
 
   render() {
     let dragDates = this.state.data;
@@ -288,6 +282,7 @@ export default class DragBtnContainer extends Component {
 
 
     let expert = this.state.expert;
+    console.log(expert, expert !== '' ? 'view' : 'text');
     return (
       <View style={[styles.container]}>
         {
@@ -313,12 +308,20 @@ export default class DragBtnContainer extends Component {
                 top: this.state.top,
                 left: this.state.left
               }]}
-              url={dragDates[expert].url}
               key={'expert'}
               ref={'expert'}
-            />
+            >
+              <Image
+                source={dragDates[expert].url}
+                style={{
+                  width: width,
+                  height: height,
+                }}
+                resizeMode='contain'
+              />
+            </View>
           )
-            : <Text/>
+            : <Text>nonono</Text>
         }
       </View>
     );
@@ -337,15 +340,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 4,
-  },
-  textContainer: {
-    width: width,
-    height: height,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-    //borderColor: '#e8e8e8',
-    borderColor: '#000',
   }
 });
