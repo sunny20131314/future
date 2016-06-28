@@ -12,14 +12,17 @@ import {
 } from 'react-native';
 
 //import InitialRouter from './initialRouter';
-import DragBtnContainer from './dragBtn';
-import DragReg from './dragReg';
+import DragBtn from './dragBtn-nospace';
+//import DragReg from './dragReg';
 
+let MyComponent = require('./dragBtn');
 
 class TestMore extends Component {
   render() {
     return (
-      <DragBtnContainer />
+      <View>
+        <DragBtn />
+      </View>
     )
   }
 
