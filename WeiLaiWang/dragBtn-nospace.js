@@ -131,12 +131,12 @@ class DragBtn extends Component {
     super(props);
 
     this.state = {
-      position: 'relative',
-      top: 0,
-      left: 0,
+      //position: 'relative',
+      //top: 0,
+      //left: 0,
       index: '',
       oriIndex: this.props.index,
-      first: true
+      //first: true
     }
   }
 
@@ -151,106 +151,44 @@ class DragBtn extends Component {
 
       onResponderTerminationRequest: (evt) => false,
 
-      //响应对应事件后的处理:
-      //onPanResponderGrant: ()=>{
-      //  // 每一个拖动的数据!  没有使用
-      //  let index = this.props.index;
-      //},
       onPanResponderMove: (evt,gs)=>{
         let nativeEvt = evt.nativeEvent;
-        //console.log(nativeEvt.pageX,nativeEvt.pageY, 'page');
-        console.log(this.props.href, this.props.index, this.state.oriIndex);
-        // 虚拟占位
-
         console.log(gs.dy, gs.x0,gs.y0, gs, 'gs');
 
         // 虚拟占位
         judgeIndex(nativeEvt.pageX,nativeEvt.pageY);
         let index = judgeNum;
 
+        console.log(this.props.href, this.props.index, this.state.oriIndex);
+
         // 设置当前index, 记录移动的位置!
         this.setState({
-          position: 'absolute',
-          left: nativeEvt.pageX - width / 2,
-          top: nativeEvt.pageY - height / 2,
           index: index
         });
 
-        //
-        let add = false;
-        // 在当前这个位置移动时,
-        if( this.state.first ) {
-          this.setState({
-            first: false,
-          });
-          add = true;
-          console.log(add, index, 'first进入, num, index');
-        }
-        else if(this.state.index === index && this.state.oriIndex === index){
-          add = true
-        }
+        let oriIndex = this.state.oriIndex;
+        let dragingData = dragDate.splice(oriIndex, 1)[0];  //得到数组!
+        dragDate.splice( index, 0, dragingData );
 
-        let num = add ? index + 1 : index;
-        let indexNow = add ? index : index + 1;
-        console.log( index , indexNow, num);
-
-        console.log(this.props.href, this.props.index, this.state.oriIndex);
-
-          //console.log( this.state.oriIndex, this.state.index, index, '移动到的上一位置及当前');
-
-          // 拖动过程中,总数据不变,当前拖动元素绝对定位,
-          // 添加空数据,一个虚拟定位
-          // 位置不能放入前一个位置,其余都没问题 --
-          // 仅仅是第一次执行!  记录当前拖动中的数据排序
-          dragingAllData = dragDate.slice(0);
-          dragingAllData.splice(num, 0, dragingInstead);
-
-          console.log(dragingAllData, 'ondraging');
-
-          this.props.onDraging(dragingAllData);
-
-        //this.props.onDraging(index, nativeEvt.pageX - width / 2, nativeEvt.pageY - height / 2, add);
-
+        this.props.onDraging(dragDate, nativeEvt.pageY - height / 2, nativeEvt.pageX - width / 2, index);
       },
       onPanResponderRelease: (evt,gs)=>{
         console.info('松手啦~~~');
-        this._handlePanResponder();
+        //this._handlePanResponder();
       },
-
       //另一个组件成了手势响应器时（当前组件手势结束）的处理
       onPanResponderTerminate: (evt, gestureState) => {
         console.log( '另一个组件已经成为了新的响应者' );
-        this._handlePanResponder();
+        //this._handlePanResponder();
       }
-
     })
   }
 
   _handlePanResponder() {
     console.log('handle11111~~~~ end11111~~~');
-    let oriIndex = this.state.oriIndex;
-    let index = this.state.index;
-
-    console.log(oriIndex, index);
-
-    // 如果数据移动到同一位置时
-    //if( index !== oriIndex ){
-      // 把拖动的数据,替换到当前位置
-      let dragingData = dragDate.splice(oriIndex, 1);  //得到数组!
-      dragDate.splice( index, 0, dragingData[0] );
-    //}
-
-    this.props.onDragEnd(dragDate);
-
-    //在整个数组位置变动后, 又是一个新的数组, 所以需要把first标记为true
-    this.setState({
-      position: 'relative',
-      top: 0,
-      left: 0,
-      //first: true,
-    });
-
+    this.props.onDragEnd();
     // 储存 dragDate 数据 --
+
   }
 
   _handleStartShouldSetPanResponder(evt, gestureState) {
@@ -274,27 +212,11 @@ class DragBtn extends Component {
 
   render() {
     console.log( '子组件render~~~~' );
-    let borderWidth = this.props.url ? 0 : 1;
-
-    if( borderWidth ) {
-      return (
-        <View
-          style={[styles.textContainer, {
-            borderWidth: borderWidth,
-          }]}>
-
-        </View>
-      );
-    }
 
     return (
       <View
         {...this._panResponder.panHandlers}
-        style={[styles.imgContainer, {
-          position: this.state.position,
-          top: this.state.top,
-          left: this.state.left
-        }]}>
+        style={[styles.imgContainer]}>
         <Image
           source={this.props.url}
           style={{
@@ -314,18 +236,34 @@ export default class DragBtnContainer extends Component {
 
     this.state = {
       data: dragDate,
-      expert: ''
+      expert: '',
+      position: 'relative',
+      top: 0,
+      left: 0
     }
   }
 
-  _updateData(data){
+  _updateData(data, top, left, expert){
     console.log( '子组件传过来的数据', data );
 
     this.setState({
       data: data
     });
+    this._expert('absolute', top, left, expert);
   }
 
+  _onDragEnd(data){
+    this._expert();
+  }
+
+  _expert(position = 'relative', top = 0, left = 0, expert = '') {
+    this.setState({
+      expert: expert,
+      position: position,
+      top: top,
+      left: left,
+    })
+  }
   shouldComponentUpdate(nextProps, nextState) {
     let data = this.state.data;
     let nextData = nextState.data;
@@ -343,7 +281,6 @@ export default class DragBtnContainer extends Component {
     return isAlter;
   }
 
-
   render() {
     let dragDates = this.state.data;
     console.log('当前遍历的数据', dragDates);
@@ -351,18 +288,6 @@ export default class DragBtnContainer extends Component {
 
 
     let expert = this.state.expert;
-    let expertDom = expert
-      ? (
-          <DragBtn
-            url={dragDates[expert].url}
-            key={'expert'}
-            ref={'expert'}
-          />
-        )
-      : (
-          <Text> no <Text>
-        );
-
     return (
       <View style={[styles.container]}>
         {
@@ -375,11 +300,26 @@ export default class DragBtnContainer extends Component {
                 ref={'btn'+i}
                 index={i}
                 onDraging={this._updateData.bind(this)}
-                onDragEnd={this._updateData.bind(this)}/>
+                onDragEnd={this._onDragEnd.bind(this)}/>
             )
           })
         }
-        {expertDom}
+        {
+          expert !== ''
+            ? (
+            <View
+              style={[styles.imgContainer,{
+                position: this.state.position,
+                top: this.state.top,
+                left: this.state.left
+              }]}
+              url={dragDates[expert].url}
+              key={'expert'}
+              ref={'expert'}
+            />
+          )
+            : <Text/>
+        }
       </View>
     );
   }
