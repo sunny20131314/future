@@ -8,7 +8,6 @@ import React from 'react';
 let SortableListView = require('./sortable');
 import {
   TouchableHighlight,
-  StyleSheet,
   Text,
   View
 } from 'react-native';
@@ -38,16 +37,18 @@ let order = Object.keys(data); //Array of keys
 
 let RowComponent = React.createClass({
   render: function() {
-    return <TouchableHighlight underlayColor={'#eee'} style={{padding: 25, backgroundColor: "#F8F8F8", borderBottomWidth:1, borderColor: '#eee'}} {...this.props.sortHandlers}>
+    return <TouchableHighlight
+      underlayColor={'#eee'}
+      style={{width: 100, height: 100, padding: 25, backgroundColor: "#F8F8F8", borderBottomWidth:1, borderColor: '#eee'}} {...this.props.sortHandlers}>
       <Text>{this.props.data.text}</Text>
     </TouchableHighlight>
   }
-})
+});
 
 let MyComponent = React.createClass({
   render: function() {
     return <SortableListView
-      style={styles.SortableListView}
+      style={{flex: 1, flexWrap: 'wrap'}}
       data={data}
       order={order}
       onRowMoved={e => {
@@ -55,17 +56,7 @@ let MyComponent = React.createClass({
             this.forceUpdate();
           }}
       renderRow={row => <RowComponent data={row} />}
-      scrollEnabled={true}
     />
-  }
-});
-
-
-const styles = StyleSheet.create({
-  SortableListView: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
   }
 });
 

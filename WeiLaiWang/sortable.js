@@ -52,10 +52,11 @@ var Row = React.createClass({
         onLongPress: this.handleLongPress,
         onPressOut: this.props.list.cancel}
     );
+    let style = this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : null;
     return (
       <View
         onLayout={this.props.onRowLayout}
-        style={this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : null}
+        style={[style, {width: 100, height: 100, flexDirection: 'row',flexWrap: 'wrap'}]}
         ref="view"
       >
       {this.props.hovering && shouldDisplayHovering ? this.props.activeDivider : null}
@@ -285,7 +286,6 @@ var SortableListView = React.createClass({
   },
   renderRow: function(data, section, index, highlightfn, active) {
     let Component = active ? SortRow : Row;
-    console.log(active, active ? 'SortRow' : 'Row', '觉得用的组件: SortRow : Row');
     let isActiveRow = (!active && this.state.active && this.state.active.rowData.index === index);
     if (!active && isActiveRow) {
       active = {active: true};
@@ -343,6 +343,7 @@ var SortableListView = React.createClass({
           if (this.props.onScroll) this.props.onScroll(e);
         }}
         onContentSizeChange={(width, height) => {
+        console.log(this.props);
           this.scrollContainerHeight = height;
         }}
         onLayout={(e) => this.listLayout = e.nativeEvent.layout}
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    //justifyContent: 'space-between',
+    justifyContent: 'space-between',
     //alignItems: 'flex-start',
   }
 });
