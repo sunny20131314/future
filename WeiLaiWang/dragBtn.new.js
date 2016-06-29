@@ -391,9 +391,9 @@ export default class DragBtnContainer extends Component {
         onUpdate={this._onUpdate.bind(this)}
         url={dragDate[data].url}
         href={dragDate[data]}
+        ref={'item' + rowID}
+        attr={data}  // 对象的key,s
         key={data}
-        attr={data}  // 对象的key,
-        ref={data}
         index={rowID}
       />
     );
