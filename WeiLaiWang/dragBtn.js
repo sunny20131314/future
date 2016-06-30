@@ -48,7 +48,7 @@ let RowComponent = React.createClass({
 let MyComponent = React.createClass({
   render: function() {
     return <SortableListView
-      style={{flex: 1, flexWrap: 'wrap'}}
+      style={{flex: 1}}
       data={data}
       order={order}
       onRowMoved={e => {

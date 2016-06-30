@@ -1,18 +1,19 @@
 /**
  * Created by sunny on 16/6/28.
  * 逻辑:
- *      1, 添加一个额外的元素, 专门用来显示在hover/ touchmove 过程中的图标
- *      2, 在拖动过程中, 在一定时间内, 移动到某一元素下(设置一定时间, 做延迟处理)
- *      3, 拖动结束后, 额外元素恢复其位置.
+ *      1, 通过添加 marginLeft or marginRight(width + 4) 实现 空位视觉, 停止拖拽之后再把数据修改
+ *      2, 在拖动过程中, 当前元素绝对定位, top:pageY,
+ *      3, 在一定时间内, 移动到某一元素i下(设置一定时间, 做延迟处理),
+ *      4, 如果为最右边,  i-1 设置 marginRight,
+ *      5, 其余情况,  i 设置  marginLeft,
+ *      6, 拖动结束后, 修改数据
  *
- * 如果给每个元素上都绑定 一个 panReaponder 相应者, 那么我需要
- *   1, 判断其位置,
- *   2, 获取其位移,移动到的位置...
+ * 目的:
+ *      1, 减少渲染页面(不在拖拽的过程中修改数据!!! 而是停止后渲染数据)
+ *      2, 提升性能
  *
- * 遇到的问题:
- *   1, 如何获取是在哪个位置移动...   --- 手动获取目前listView 的顶部位置, 再加上当前位置, 即为在listView中的全部位移
- *   2, 恩, 要判断是 listview 上的滑动 还是 单个元素的拖拽  --- onLongPress 触发其父元素上不可滑动...
- *   3, 可以获取到相关元素
+ * 问题:
+ *      1, 我如何获取相应index 对应的 组件呢??
  */
 
 
@@ -72,38 +73,38 @@ var dragDate = {
     href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
   }
 
-  ,ele1: {
-    url: require( './img/elema490.png' ),
-    href: 'https://m.ele.me/home'
-  },
-  meituan1: {
-    url: require( './img/meituan490.png' ),
-    href: 'http://i.meituan.com/'
-  },
-  nuomi1: {
-    url: require( './img/baidunuomi490.png' ),
-    href: 'http://m.nuomi.com/'
-  },
-  dameile1: {
-    url: require( './img/dameile490.png' ),
-    href: 'http://www.dominos.com.cn/'
-  },
-  kfc1: {
-    url: require( './img/kendeji490.png' ),
-    href: 'http://m.kfc.com.cn/'
-  },
-  mcdonalds1: {
-    url: require( './img/maidanglao490.png' ),
-    href: 'http://www.mcdonalds.com.cn/'
-  },
-  jiyejia1: {
-    url: require( './img/jiyejia490.png' ),
-    href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
-  },
-  bishengke1: {
-    url: require( './img/bishengke490.png' ),
-    href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
-  }
+  //,ele1: {
+  //  url: require( './img/elema490.png' ),
+  //  href: 'https://m.ele.me/home'
+  //},
+  //meituan1: {
+  //  url: require( './img/meituan490.png' ),
+  //  href: 'http://i.meituan.com/'
+  //},
+  //nuomi1: {
+  //  url: require( './img/baidunuomi490.png' ),
+  //  href: 'http://m.nuomi.com/'
+  //},
+  //dameile1: {
+  //  url: require( './img/dameile490.png' ),
+  //  href: 'http://www.dominos.com.cn/'
+  //},
+  //kfc1: {
+  //  url: require( './img/kendeji490.png' ),
+  //  href: 'http://m.kfc.com.cn/'
+  //},
+  //mcdonalds1: {
+  //  url: require( './img/maidanglao490.png' ),
+  //  href: 'http://www.mcdonalds.com.cn/'
+  //},
+  //jiyejia1: {
+  //  url: require( './img/jiyejia490.png' ),
+  //  href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
+  //},
+  //bishengke1: {
+  //  url: require( './img/bishengke490.png' ),
+  //  href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
+  //}
 }; // 全部数据
 var order = Object.keys(dragDate); //Array of keys
 //console.log(order);
@@ -113,9 +114,15 @@ var dragDateLen = order.length;
 var listViewH = ''; // listView 高度
 var scrollTop = 0; //listView 滚动的高度
 var baseHeight = 0;  // 手机自带导航栏的高度
+var marginSpace  = width + 4;  // 左右margin 实现空位视觉
+
+let refItem = {};
+
+
+
 // 相应的坐标值
-var siteArr = [];
 // 高度对应
+var siteArr = [];
 for ( let i = 0; i !== dragDateLen + 2; i++) {
   let res = i % 2;  // 0 or 1
   let multiple = Math.floor(i/2); //高度倍率
@@ -143,6 +150,14 @@ function judgeIndex(w, h, i=0) {
   judgeIndex( w, h, numH );
 }
 
+function copyArrayStr(arr) {
+  let len = arr.length;
+  var newArr = [];
+  for ( let i = 0; i !== len; i++) {
+    newArr[i] = arr[i];
+  }
+  return newArr;
+}
 class DragBtn extends Component {
   constructor(props) {
     super(props);
@@ -155,6 +170,7 @@ class DragBtn extends Component {
 
 
   }
+
   //shouldComponentUpdate(nextProps, nextState) {
   //  return ;
   //}
@@ -172,7 +188,7 @@ class DragBtn extends Component {
       //return  vy >= 50 || vx >= 50 && !this.state.listen;
 
       scroll && this.id && clearTimeout(this.id);
-      return scroll && listViewH >= HEIGHT;
+      return scroll;
     },
     onPanResponderGrant: (e, gs) => {
       console.log('onPanResponderGrant');
@@ -183,29 +199,34 @@ class DragBtn extends Component {
     onMoveShouldSetPanResponder: () => true,
     onResponderTerminationRequest: (evt) => false,
     onPanResponderMove: (evt,gs)=>{
+      this.updateId && clearTimeout(this.updateId);
       let { identifier, pageX, pageY, locationX, locationY } = evt.nativeEvent;
-      //console.log( this.state.oriIndex, pageX, pageY, 'oriIndex, pageX, pageY, locationX, locationY');
-      //let {moveX, moveY, x0, y0, dx, dy} = gs;
-      //console.log(moveX, moveY, x0, y0, dx, dy, 'moveX, moveY, x0, y0, dx, dy');
-
-      // 当前额外元素的位置  相对于根目录,
-      // 判断滚动到的位置   相对于父元素的总坐标和横坐标(listView的top, left)
-
-      let offsetY = pageY + scrollTop - baseHeight;
+      // 当前额外元素的位置   相对于根目录,
+      // 判断滚动到的位置呢   相对listView的总坐标和横坐标(的top, left)
 
       // 虚拟占位
+      let offsetY = pageY + scrollTop - baseHeight;
       judgeIndex(pageX, offsetY);
       let index = judgeNum;
 
-      console.log(index, pageY, scrollTop,  baseHeight, offsetY, 'index, pageY, scrollTop, baseHeight,offsetY');
+      let right = pageX > width;
 
-      // 添加的额外元素定位
+      console.log(index, pageY, right, scrollTop,  baseHeight, offsetY, 'index, pageY, right, scrollTop, baseHeight,offsetY');
+
+      // 添加的空位
       console.log('onDraging');
       this.props.onDraging(false, this.props.attr, {top: pageY - height/2, left: pageX - width/2});
 
-      // 更新数组  做延迟处理, 快速移动到某位置时... oriIndex, nowIndex
-      console.log('onUpdate');
-      this.props.onUpdate(this.props.index, index);
+      // 更新数组  做延迟处理, 快速移动到某位置时 || 移动回原来的位置时 oriIndex, nowIndex
+      //let lastIndex = this.state.index;
+      //let oriIndex = this.props.index;
+      //if( index === lastIndex || index === oriIndex ){
+      //  return false;
+      //}
+      //this.updateId = setTimeout( () => {
+      //  console.log('onUpdate');
+      //  this.props.onUpdate( oriIndex, index);
+      //}, 300);
     },
     onPanResponderRelease: (evt,gs)=>{
       console.info('松手啦~~~');
@@ -225,11 +246,21 @@ class DragBtn extends Component {
     this.props.onDraging(true, '');
   }
 
+  componentDidMount() {
+    //let key = Object.keys(this.refs)[0];
+    //refItem[key] = this.refs[key];
+  }
+
+
   render() {
+
+
     console.log( '子组件在render~~~~' );
+
     return (
       <View
         {...this._panResponder.panHandlers}
+        ref={'list' + this.props.index}
       >
         <TouchableHighlight
           onLongPress={() => {
@@ -284,7 +315,7 @@ export default class DragBtnContainer extends Component {
   componentDidMount() {
     this.setState({
       ds: this.state.ds.cloneWithRows(this.state.order)
-    })
+    });
   }
 
 
@@ -297,7 +328,7 @@ export default class DragBtnContainer extends Component {
     console.log(expert, expert !== '' ? 'view' : 'text');
 
     let couldScroll = this.state.couldScroll;
-    console.log(dragDates, this.state.ds, 'before');
+    console.log(dragDates, this.state.ds, 'before  && now');
 
     return (
       <View
@@ -329,37 +360,42 @@ export default class DragBtnContainer extends Component {
           onLayout={(e,a) => {
             baseHeight = e.nativeEvent.layout.y;
           }}
-          scrollEnabled={ couldScroll }
+          scrollEnabled={ couldScroll && listViewH >= HEIGHT}
           //scrollEnabled={ true }
           renderRow={this.renderRow.bind(this)}
         />
-        {      // 返回额外的元素!
-          this.state.expert !== ''
-          ? (
-          <View
-            style={[styles.row,{
+        <View
+          style={[styles.row,{
                 position: 'absolute',
                 top: this.state.top,
                 left: this.state.left
               }]}
-            key={'expert'}
-            ref={'expert'}
-          >
-            <Image
-              source={dragDate[expert].url}
-              style={[styles.thumb, styles.expert]}
-              resizeMode='contain'
-            />
-          </View>
-          )
-          : <Text> text~~~~ </Text>
-        }
+          key={'expert'}
+          ref={'expert'}
+        >
+          {      // 返回额外的元素!
+            this.state.expert !== ''
+              ? (
+                <Image
+                  source={dragDate[expert].url}
+                  style={[styles.thumb, styles.expert]}
+                  resizeMode='contain'
+                />
+              )
+              : <Text />
+          }
+
+        </View>
+
     </View>
     );
   }
 
   _onDraging(bool, attr, pos = {top: 0, left: 0}) {
     let {top, left} = pos;
+    console.log();
+    //setNativeProps 的使用!
+    //console.log(this.refs.expert.setNativeProps(pos));
     this.setState({
       couldScroll: bool,
       expert: attr,
@@ -370,7 +406,8 @@ export default class DragBtnContainer extends Component {
 
   _onUpdate(oriIndex, nowIndex) {
     console.log(oriIndex, nowIndex);
-    let order = this.state.order;
+    //copyArrayStr
+    let order = copyArrayStr(this.state.order);
     let oriData = order.splice( oriIndex, 1 )[0];
     order.splice( nowIndex, 0, oriData);
 
@@ -384,7 +421,6 @@ export default class DragBtnContainer extends Component {
 
   }
   renderRow(data, sectionID, rowID, highlightRow) {
-    console.log(data, rowID, highlightRow, 'data, rowID, highlightRow' );
     return (
       <DragBtn
         onDraging={this._onDraging.bind(this)}

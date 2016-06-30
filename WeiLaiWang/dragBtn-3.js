@@ -56,7 +56,6 @@ var dragDate = [
     href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
   }
 ]; // 全部数据
-dragDate.length = 1;
 
 var dragingAllData; // 拖动后剩下的数据
 var dragingInstead = {url: ''};  //占位的数据
@@ -102,7 +101,7 @@ class DragBtn extends Component {
     // top, left 改为当前所在的位置!
     this.state = {
       position: 'relative',
-      top: 400,
+      top: 0,
       left: 0,
       index: '',
       oriIndex: '',
@@ -158,9 +157,9 @@ class DragBtn extends Component {
           console.log('change');
           // 拖动过程中,总数据不变,当前拖动元素绝对定位,
           // 添加空数据,一个虚拟定位
-          dragingAllData = dragDate.slice(0);
-          dragingAllData.splice(index, 0, dragingInstead);
-          this.props.onDraging(dragingAllData);
+          //dragingAllData = dragDate.slice(0);
+          //dragingAllData.splice(index, 0, dragingInstead);
+          //this.props.onDraging(dragingAllData);
         }
       },
       onPanResponderRelease: (evt,gs)=>{

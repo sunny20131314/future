@@ -332,12 +332,13 @@ var SortableListView = React.createClass({
         {...this.state.panResponder.panHandlers}
         ref="list"
         pageSize={1}
+        style={{height: 600}}
         showsHorizontalScrollIndicator={false}
         dataSource={dataSource}
         showsVerticalScrollIndicator={true}
         onScroll={e => {
           console.log(this.state.active, this.props.scrollEnabled, !this.state.active && this.props.scrollEnabled, 'this.state.active, this.props.scrollEnabled,');
-          this.scrollValue = e.nativeEvent.contentOffset.y;
+          this.scrollValue = e.nativeEvent.contentOffset.y; //listview 滚动的顶部距离
                     console.log(this.scrollValue, 'scrollValue');
 
           if (this.props.onScroll) this.props.onScroll(e);
