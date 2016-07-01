@@ -14,6 +14,10 @@
  *   2, 恩, 要判断是 listview 上的滑动 还是 单个元素的拖拽  --- onLongPress 触发其父元素上不可滑动...
  *   3, 可以获取到相关元素
  *
+ * 性能:
+ *   1, 当之前拖动过的元素, 点击,长按无效... --
+ *
+ *
  */
 
 
@@ -30,8 +34,9 @@ import {
   View
 } from 'react-native';
 
-var Order = require('react-native-order-children');
-console.log(Order);
+console.log(global.storage);
+
+
 // 计算每个image的大小,高宽和图等比例!
 //var {width as WIDTH, height as HEIGHT} = Dimensions.get('window');
 let WIDTH = Dimensions.get('window').width;
@@ -163,13 +168,24 @@ class DragBtn extends Component {
     this.state = {
       index: '', // 记录当前移动到的位置
       listen: false,
+      fadeAnim: new Animated.Value(0), // opacity 0
     };
 
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    //console.log(nextProps.attr, this.props.attr,nextProps.attr !== this.props.attr,' nextProps.attr, this.props.attr,');
-    return nextProps.attr !== this.props.attr;
+    let listen = this.state.listen;
+    return nextProps.attr !== this.props.attr || listen;
+  }
+
+  componentDidMount() {
+    Animated.timing(       // Uses easing functions
+      this.state.fadeAnim, // The value to drive
+      {
+        toValue: 1,        // Target
+        duration: 600,    // Configuration
+      }
+    ).start();             // Don't forget start!
   }
 
   _panResponder = PanResponder.create({
@@ -182,21 +198,29 @@ class DragBtn extends Component {
     },
     onPanResponderGrant: (e, gs) => {
       console.log('onPanResponderGrant');
+      let { pageX, pageY } = e.nativeEvent;
       this.id = setTimeout( () => {
-        this.props.onDraging(false, this.props.attr);
-      }, 200);
+        this.props.onStartDrag(this.props.attr, {y: pageY - height/2, x: pageX - width/2});
+        Animated.timing(       // Uses easing functions
+          this.state.fadeAnim, // The value to drive
+          {
+            toValue: 0,        // Target
+            duration: 400,    // Configuration
+          }
+        ).start();
+      }, 100);
     },
     onMoveShouldSetPanResponder: () => true,
     onResponderTerminationRequest: (evt) => false,
     onPanResponderMove: (evt,gs)=>{
-
       // 当前额外元素的位置   相对于根目录,
       // 判断滚动到的位置呢   相对listView的总坐标和横坐标(的top, left)
       let { pageX, pageY } = evt.nativeEvent;
       let offsetY = pageY + scrollTop - baseHeight;
 
       // 虚拟占位
-      judgeIndex(pageX, offsetY);
+      //judgeIndex(pageX - width/2 , offsetY - height/2);
+      judgeIndex(pageX , offsetY);
       let index = judgeNum;
 
       // 移动还在当前元素范围内时 oriIndex, nowIndex
@@ -208,14 +232,13 @@ class DragBtn extends Component {
       }
 
       // 更新数组  做延迟处理, 快速移动到某位置时
-      //let {vx, vy} = gs;
+      let {vx, vy, dx, dy} = gs;
       //if( Math.abs(vx) <= 0.03 || Math.abs(vy) <= 0.03  ){
       //  return false;
       //}
 
-      //console.log(vx, vy, 'onDraging');
       // 添加的额外元素定位
-      this.props.onDraging(false, this.props.attr, {top: pageY - height/2, left: pageX - width/2});
+      this.props.onDraging({x: dx, y:dy});
     },
     onPanResponderRelease: (evt,gs)=>{
       console.info('松手啦~~~');
@@ -232,18 +255,28 @@ class DragBtn extends Component {
       listen: false
     });
     this.id && clearTimeout(this.id);
-    this.props.onDraging(true, '');
 
-    let lastIndex = this.state.index;
-    let oriIndex = this.props.index;
+    let lastIndex = Number(this.state.index);
+    let oriIndex = Number(this.props.index);
+
     if(lastIndex === oriIndex){
-      return false;
+      // 当前元素显示
+      Animated.timing(       // Uses easing functions
+        this.state.fadeAnim, // The value to drive
+        {
+          toValue: 1,        // Target
+          duration: 400,    // Configuration
+        }
+      ).start();
     }
+
     this.props.onUpdate( oriIndex, lastIndex);
   }
 
   render() {
-    console.log( '子组件在render~~~~' );
+    let listen = this.state.listen;
+
+    console.log( listen, '子组件在render~~~~' );
     return (
       <View
         {...this._panResponder.panHandlers}
@@ -259,46 +292,19 @@ class DragBtn extends Component {
           onPress={() => console.log('press')}
           underlayColor="transparent"
         >
-          <View
-            style={styles.row}>
+          <Animated.View   // Special animatable View
+            style={[styles.row, {
+              opacity: this.state.fadeAnim,  // Binds
+            }]}>
             <Image
               source={this.props.url}
               style={styles.thumb}
               resizeMode='contain'
             />
-          </View>
+          </Animated.View>
         </TouchableHighlight>
       </View>
 
-    );
-  }
-}
-
-class Expert extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-    };
-  }
-
-  render() {
-    return (
-      <View
-        style={[styles.row,{
-                position: 'absolute',
-                top: this.state.top,
-                left: this.state.left
-              }]}
-        key={'expert'}
-        ref={'expert'}
-      >
-        <Image
-          source={dragDate[expert].url}
-          style={[styles.thumb, styles.expert]}
-          resizeMode='contain'
-        />
-      </View>
     );
   }
 }
@@ -313,11 +319,11 @@ export default class DragBtnContainer extends Component {
           return true;
         }
       }),
+      fadeAnim: new Animated.Value(0), // opacity 0
+      sticker: new Animated.ValueXY(),                    // 1 leader
       couldScroll: true,
       order: order,
-      expert: '',
-      top: 0,
-      left: 0,
+      expert: order[0],
     }
   }
 
@@ -332,7 +338,6 @@ export default class DragBtnContainer extends Component {
     //console.log('当前遍历的数据', dragDates);
     console.info( 'listView render' );
 
-    let expert = this.state.expert;
     let couldScroll = this.state.couldScroll;
     return (
       <View
@@ -362,71 +367,111 @@ export default class DragBtnContainer extends Component {
           scrollEnabled={ couldScroll && listViewH > HEIGHT}
           renderRow={this.renderRow.bind(this)}
         />
-        <View
+
+        <Animated.View
           style={[styles.row,{
                 position: 'absolute',
-                top: this.state.top,
-                left: this.state.left
+                top: 0,
+                left: 0,
+                opacity: this.state.fadeAnim,
+                transform: this.state.sticker.getTranslateTransform()
               }]}
           key={'expert'}
           ref={'expert'}
         >
-          {      // 返回额外的元素!
-            this.state.expert !== ''
-              ? (
-                <Image
-                  source={dragDate[expert].url}
-                  style={[styles.thumb, styles.expert]}
-                  resizeMode='contain'
-                />
-              )
-              : <Text />
-          }
-
-        </View>
+          <Image
+            ref='expertImg'
+            source={dragDate[this.state.expert].url}
+            style={[styles.thumb, styles.expert]}
+            resizeMode='contain'
+          />
+        </Animated.View>
 
     </View>
     );
   }
 
-  _onDraging(bool, attr, pos = {top: 0, left: 0}) {
-    let {top, left} = pos;
-    console.log();
+  _onStartDrag( attr ,pos = {y: 0, x: 0}) {
+    console.log(attr, pos, this, this.state.sticker);
+
+    // 设置位移!
+    this.state.sticker.setOffset(pos);
+
     this.setState({
-      couldScroll: bool,
-      expert: attr,
-      top: top,
-      left: left,
+      couldScroll: false,
+      expert: attr
     });
+
+    // 额外元素
+    Animated.timing(       // Uses easing functions
+      this.state.fadeAnim, // The value to drive
+      {
+        toValue: .8,        // Target
+        duration: 100,    // Configuration
+      }
+    ).start();
+
+    this.refs.expert.setNativeProps({style: {
+      transform: [
+        {translateX:  pos.x},
+        {translateY:  pos.y}
+      ]
+    }});
   }
 
-  // --
-  sortBy(array, key) {
-    return array.sort(function(a, b) {
-      console.log(a, b);
-      var x = a.props[key]; var y = b.props[key];
-      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-    });
+
+  _onDraging(pos = {x: 0, y: 0}) {
+    //let {x, y} = pos;
+    //console.log(pos, this.state.sticker, this.state.fadeAnim, 'pos');
+
+    // 额外元素 直接设置则没有动画效果 --
+
+
+    // 也是直接设置,但是报错 --
+    //this.refs.expert.setNativeProps({style: {
+    //  transform: this.state.sticker.getTranslateTransform()
+    //}});
+
+    // 额外元素 拖动
+    Animated.spring(this.state.sticker, {
+      tension: 10,
+      friction: 3,
+      toValue: pos,               // Animated toValue's are tracked
+    }).start();
   }
 
   _onUpdate(oriIndex, nowIndex) {
+    // 额外元素
+    Animated.timing(       // Uses easing functions
+      this.state.fadeAnim, // The value to drive
+      {
+        toValue: 0,        // Target
+        duration: 400,    // Configuration
+      }
+    ).start();
+
+    if(nowIndex === oriIndex){
+      this.setState({
+        couldScroll: true,
+      });
+      return false;
+    }
+
     console.log(oriIndex, nowIndex, 'oriIndex, nowIndex, this.props.children');
-    //copyArrayStr
     let order = copyArrayStr(this.state.order);
     let oriData = order.splice( oriIndex, 1 )[0];
     order.splice( nowIndex, 0, oriData);
 
-    console.log(order);
-
     this.setState({
+      couldScroll: true,
       ds: this.state.ds.cloneWithRows(order),
       order: order
     });
-
   }
   renderRow(data, sectionID, rowID, highlightRow) {
     return (
       <DragBtn
+        onStartDrag={this._onStartDrag.bind(this)}
         onDraging={this._onDraging.bind(this)}
         onUpdate={this._onUpdate.bind(this)}
         url={dragDate[data].url}
@@ -459,6 +504,7 @@ const styles = StyleSheet.create({
   thumb: {
     width: width,
     height: height,
+    backgroundColor: 'transparent',
   },
   expert: {
     borderColor: '#e8e8e8',

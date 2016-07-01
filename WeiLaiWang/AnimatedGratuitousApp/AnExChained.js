@@ -66,7 +66,7 @@ class AnExChained extends React.Component {
       onPanResponderGrant: () => {
         this.state.stickers[0].stopAnimation((value) => {
           console.log(value, Animated.event);
-          this.state.stickers[0].setOffset(value);           // start where sticker animated to
+          this.state.stickers[0].setOffset({x: -100, y: -100});           // start where sticker animated to
           this.state.stickers[0].setValue({x: 0, y: 0});     // avoid flicker before next event
         });
       },
@@ -82,6 +82,7 @@ class AnExChained extends React.Component {
     return (
       <View style={styles.chained}>
         {this.state.stickers.map((_, i) => {
+          // 倒叙是因为 排在最后面的才能覆盖最前面的啊~~~
           var j = this.state.stickers.length - i - 1; // reverse so leader is on top
           var handlers = (j === 0) ? this.state.chainResponder.panHandlers : {};
           return (

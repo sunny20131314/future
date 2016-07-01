@@ -33,16 +33,16 @@ class FadeInView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fadeAnim: new Animated.Value(0), // opacity 0
+      fadeAnim: new Animated.Value(1), // opacity 0
     };
   }
   componentDidMount() {
     Animated.timing(       // Uses easing functions
       this.state.fadeAnim, // The value to drive
       {
-        toValue: 1,        // Target
+        toValue: 0,        // Target
         duration: 2000,    // Configuration
-      },
+      }
     ).start();             // Don't forget start!
   }
   render() {
