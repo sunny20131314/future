@@ -1,22 +1,5 @@
 /**
  * Created by sunny on 16/6/28.
- * 逻辑:
- *      1, 添加一个额外的元素, 专门用来显示在hover/ touchmove 过程中的图标
- *      2, 在拖动过程中, 在一定时间内, 移动到某一元素下(设置一定时间, 做延迟处理)
- *      3, 拖动结束后, 额外元素恢复其位置.
- *
- * 如果给每个元素上都绑定 一个 panReaponder 相应者, 那么我需要
- *   1, 判断其位置,
- *   2, 获取其位移,移动到的位置...
- *
- * 遇到的问题:
- *   1, 如何获取是在哪个位置移动...   --- 手动获取目前listView 的顶部位置, 再加上当前位置, 即为在listView中的全部位移
- *   2, 恩, 要判断是 listview 上的滑动 还是 单个元素的拖拽  --- onLongPress 触发其父元素上不可滑动...
- *   3, 可以获取到相关元素
- *
- * 性能:
- *   1, 当之前拖动过的元素, 点击,长按无效... --
- *
  *
  */
 
@@ -36,9 +19,18 @@ import {
 
 console.log(global.storage);
 
+// 获取数据!
+storage.getBatchData([
+    { key: 'tab', id: 'dingCan' },
+    { key: 'tabIndex', id: 'dingCan' }
+  ])
+  .then(results => {
+    results.forEach( result => {
+      console.log(result);
+    })
+  });
 
 // 计算每个image的大小,高宽和图等比例!
-//var {width as WIDTH, height as HEIGHT} = Dimensions.get('window');
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
 console.log(WIDTH, HEIGHT);
@@ -47,70 +39,53 @@ var height = width/490*245;
 
 // 数组的话是整个数据的改变拖拽,而用对象的话,改变相应的 key 值,并保存,貌似占位少些, 处理的数据减少了~~~
 var dragDate = {
-  ele: {
-    url: require( './img/elema490.png' ),
-    href: 'https://m.ele.me/home'
+  baiduwaimai: {
+    url: require( './img/budingwaimai490.png' ),
+    href: 'waimai.baidu.com'
   },
   meituan: {
-    url: require( './img/meituan490.png' ),
+    url: require( './img/meituanwaimai490.png' ),
     href: 'http://i.meituan.com/'
   },
-  nuomi: {
-    url: require( './img/baidunuomi490.png' ),
-    href: 'http://m.nuomi.com/'
+  dianping: {
+    url: require( './img/dazhongdp490.png' ),
+    href: 'm.dianping.com'
+  },
+  kfc: {
+    url: require( './img/kendeji490.png' ),
+    href: 'http://m.4008823823.com.cn/kfcmwos/index.htm'
+  },
+  mcdonalds: {
+    url: require( './img/maidanglao490.png' ),
+    href: 'https://www.4008-517-517.cn/m/cn/jsp-mobile/sys/userLogin.jsp'
+  },
+  ele: {
+    url: require( './img/elema490.png' ),
+    href: 'https://m.ele.me/home/'
+  },
+  bishengke: {
+    url: require( './img/bishengke490.png' ),
+    href: 'http://m.4008123123.com/'
+  },
+  jiyejia: {
+    url: require( './img/jiyejia490.png' ),
+    href: 'http://ne.4008-197-197.com/'
+  },
+  starbucks: {
+    url: require( './img/xingbake490.png' ),
+    href: 'https://www.starbucks.com.cn/'
+  },
+  beequick: {
+    url: require( './img/aixianfeng490.png' ),
+    href: 'http://m.beequick.cn'
   },
   dameile: {
     url: require( './img/dameile490.png' ),
     href: 'http://www.dominos.com.cn/'
   },
-  kfc: {
-    url: require( './img/kendeji490.png' ),
-    href: 'http://m.kfc.com.cn/'
-  },
-  mcdonalds: {
-    url: require( './img/maidanglao490.png' ),
-    href: 'http://www.mcdonalds.com.cn/'
-  },
-  jiyejia: {
-    url: require( './img/jiyejia490.png' ),
-    href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
-  },
-  bishengke: {
-    url: require( './img/bishengke490.png' ),
-    href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
-  }
-
-  ,ele1: {
-    url: require( './img/elema490.png' ),
-    href: 'https://m.ele.me/home'
-  },
-  meituan1: {
-    url: require( './img/meituan490.png' ),
-    href: 'http://i.meituan.com/'
-  },
-  nuomi1: {
-    url: require( './img/baidunuomi490.png' ),
-    href: 'http://m.nuomi.com/'
-  },
-  dameile1: {
-    url: require( './img/dameile490.png' ),
-    href: 'http://www.dominos.com.cn/'
-  },
-  kfc1: {
-    url: require( './img/kendeji490.png' ),
-    href: 'http://m.kfc.com.cn/'
-  },
-  mcdonalds1: {
-    url: require( './img/maidanglao490.png' ),
-    href: 'http://www.mcdonalds.com.cn/'
-  },
-  jiyejia1: {
-    url: require( './img/jiyejia490.png' ),
-    href: 'http://ne.4008-197-197.com/mobile/theme/dbjyj/home/index.html?sysSelect=1'
-  },
-  bishengke1: {
-    url: require( './img/bishengke490.png' ),
-    href: 'http://m.4008123123.com/PHHSMWOS/index.htm?utm_source=orderingsite'
+  buding: {
+    url: require( './img/budingwaimai490.png' ),
+    href: 'http://www.buding.cn/i_takeout.html'
   }
 }; // 全部数据
 var order = Object.keys(dragDate); //Array of keys
@@ -118,7 +93,6 @@ var order = Object.keys(dragDate); //Array of keys
 var dragDateLen = order.length;
 
 var listViewH = dragDateLen * (height + 4)/2 -2; // listView 高度
-
 var scrollTop = 0; //listView 滚动的高度
 var baseHeight = 0;  // 手机自带导航栏的高度
 // 相应的坐标值
@@ -323,7 +297,7 @@ export default class DragBtnContainer extends Component {
       sticker: new Animated.ValueXY(),                    // 1 leader
       couldScroll: true,
       order: order,
-      expert: order[0],
+      expert: '',
     }
   }
 
@@ -339,6 +313,8 @@ export default class DragBtnContainer extends Component {
     console.info( 'listView render' );
 
     let couldScroll = this.state.couldScroll;
+    let expert = this.state.expert;
+
     return (
       <View
         ref="wrapper"
@@ -379,12 +355,13 @@ export default class DragBtnContainer extends Component {
           key={'expert'}
           ref={'expert'}
         >
-          <Image
-            ref='expertImg'
-            source={dragDate[this.state.expert].url}
-            style={[styles.thumb, styles.expert]}
-            resizeMode='contain'
-          />
+          {
+            expert !== '' && <Image
+              source={dragDate[expert].url}
+              style={[styles.thumb, styles.expert]}
+              resizeMode='contain'
+            />
+          }
         </Animated.View>
 
     </View>
@@ -396,6 +373,7 @@ export default class DragBtnContainer extends Component {
 
     // 设置位移!
     this.state.sticker.setOffset(pos);
+    this.state.sticker.setValue({x: 0, y: 0});
 
     this.setState({
       couldScroll: false,
@@ -410,23 +388,11 @@ export default class DragBtnContainer extends Component {
         duration: 100,    // Configuration
       }
     ).start();
-
-    this.refs.expert.setNativeProps({style: {
-      transform: [
-        {translateX:  pos.x},
-        {translateY:  pos.y}
-      ]
-    }});
   }
 
 
   _onDraging(pos = {x: 0, y: 0}) {
-    //let {x, y} = pos;
-    //console.log(pos, this.state.sticker, this.state.fadeAnim, 'pos');
-
     // 额外元素 直接设置则没有动画效果 --
-
-
     // 也是直接设置,但是报错 --
     //this.refs.expert.setNativeProps({style: {
     //  transform: this.state.sticker.getTranslateTransform()
@@ -453,6 +419,7 @@ export default class DragBtnContainer extends Component {
     if(nowIndex === oriIndex){
       this.setState({
         couldScroll: true,
+        expert: ''
       });
       return false;
     }
@@ -465,7 +432,8 @@ export default class DragBtnContainer extends Component {
     this.setState({
       couldScroll: true,
       ds: this.state.ds.cloneWithRows(order),
-      order: order
+      order: order,
+      expert: ''
     });
   }
   renderRow(data, sectionID, rowID, highlightRow) {
@@ -497,8 +465,6 @@ const styles = StyleSheet.create({
   },
   row: {
     marginBottom: 4,
-    width: width,
-    height: height,
     alignItems: 'center',
   },
   thumb: {

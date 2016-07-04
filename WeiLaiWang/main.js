@@ -5,6 +5,7 @@
 import React, { Component } from 'react';
 import {
   Dimensions,
+  Platform,
   StyleSheet,
   ScrollView,
   RefreshControl,
@@ -15,12 +16,16 @@ import {
   View
 } from 'react-native';
 
+import storage from './storage';
+import ViewPager from 'react-native-viewpager';
+
 import Header from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
 import Ad from './ad';
 import SearchComponent from './search';
-import DragBtnContainer from './dragBtn';
+let Tab = require('./tab');
+import DragBtnContainer from './dragBtn.expert';
 import DeliveryBtn from './deliveryBtn';
 import BdBtm from './bd-btm';
 
@@ -38,7 +43,8 @@ var DeliveryArr = [
   {id: 'rufengda', val: '如风达'},
   {id: 'youzhengguonei', val: '包裹'}
 ];
-
+let {height} = Dimensions.get('window');
+height = Platform.OS === 'ios' ? height - 45 : height -72 ;   // scrollView 的高度(-顶部导航)
 export default class Main extends Component {
   constructor(props) {
     super(props);
@@ -53,17 +59,15 @@ export default class Main extends Component {
     navigator: React.PropTypes.object.isRequired
   };
 
+  _scrollView = '';
+
   render() {
-    // 45 是头部导航栏的高度
-    let {height} = Dimensions.get('window');
-    // ios, android 的头部宽度(即)
-    var _scrollView = ScrollView;
     return (
       <View style={styles.container}>
         <Header/>
         <ScrollView
-          ref={(scrollView) => { _scrollView = scrollView; }}
-          style={[styles.scrollView, {height: height-72 }]}
+          ref={(scrollView) => { this._scrollView = scrollView; }}
+          style={[styles.scrollView]}
           alwaysBounceHorizontal={false}
           refreshControl={
             <RefreshControl
@@ -81,9 +85,15 @@ export default class Main extends Component {
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
           </View>
 
+          {
+            // 轮播图
+          }
+          <View style={styles.container}>
+            <Tab style={styles.viewpager}/>
+          </View>
 
           {
-            // 跳转搜索
+            // 跳转drag
           }
           <TouchableHighlight
             activeOpacity={.8}
@@ -148,7 +158,7 @@ export default class Main extends Component {
         </ScrollView>
         <TouchableOpacity
           style={styles.goTop}
-          onPress={() => { _scrollView.scrollTo({x: 0,y: 0, animated: true}); }}
+          onPress={() => { this._scrollView.scrollTo({x: 0,y: 0, animated: true}); }}
         >
           <Image
             source={require('./img/icon_top.png')}
@@ -230,6 +240,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex:1,
+    height: height,
     backgroundColor: '#fff',
   },
   searchBaiDu: {
