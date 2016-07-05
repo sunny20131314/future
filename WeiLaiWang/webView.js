@@ -7,6 +7,7 @@
 import React, {Component} from 'react';
 import ReactNative, {
   AppRegistry,
+  Dimensions,
   View,
   WebView,
   Text,
@@ -15,6 +16,7 @@ import ReactNative, {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+let WIDTH = Dimensions.get('window').width;
 
 //  嵌套网站, 有返回前进, 搜索!
 export default class WebViewCom extends Component {
@@ -47,8 +49,10 @@ export default class WebViewCom extends Component {
               {'<'}
             </Text>
           </TouchableOpacity>
-          <Text style={styles.title}>{this.state.title}</Text>
-          <TouchableOpacity onPress={this.pressReturn.bind(this)}>
+          <Text style={[styles.title, {width: WIDTH - 80, textAlign: 'center'}]} numberOfLines={1}>{this.state.title}</Text>
+          <TouchableOpacity
+            onPress={this.pressReturn.bind(this)}
+          >
             <Image
               source={require('./img/logo.jpg')}
               style={styles.returnImg}

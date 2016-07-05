@@ -21,12 +21,12 @@ console.log(global.storage);
 
 // 获取数据!
 storage.getBatchData([
-    { key: 'tab', id: 'dingCan' },
-    { key: 'tabIndex', id: 'dingCan' }
+    { key: 'tab1', id: '1' },
+    { key: 'tabIndex1', id: '1' }
   ])
   .then(results => {
     results.forEach( result => {
-      console.log(result);
+      //console.log(result);
     })
   });
 

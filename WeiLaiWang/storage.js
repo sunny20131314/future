@@ -1,10 +1,10 @@
 /**
  * Created by sunzhimin on 01/07/16.
  * 存储数据
+ * 前8个显示, 其余放在之后,
  */
 
 import Storage from 'react-native-storage';
-console.log(Storage);
 import {
   Dimensions,
   Platform
@@ -14,7 +14,7 @@ import {
 let isOs = Platform.OS === 'ios';
 let {width, height} = Dimensions.get('window');
 
-// 订餐
+// 订餐 0-0
 let dingCan = {
   baiduwaimai: {
     url: require( './img/budingwaimai490.png' ),
@@ -68,9 +68,10 @@ let dingCan = {
 let dingCanOrder = {
   name: '订餐'
 };
-dingCanOrder.order = Object.keys(dingCan);  // 保存所有数据的顺序
+dingCanOrder.alter = Object.keys(dingCan);  // 保存剩余可选数据的顺序
+dingCanOrder.show = dingCanOrder.alter.splice(0, 8);  // 保存显示的数据的顺序
 
-// 交通
+// 交通 0-1
 let jiaoTong = {
   edaijia: {
     url: require( './img/edaijia490.png' ),
@@ -116,9 +117,10 @@ let jiaoTong = {
 let jiaoTongOrder = {
   name: '交通'
 };
-jiaoTongOrder.order = Object.keys(jiaoTong);
+jiaoTongOrder.alter = Object.keys(jiaoTong);
+jiaoTongOrder.show = jiaoTongOrder.alter.splice(0, 8);
 
-// 生活
+// 生活 0-2
 let shengHuo = {
   daojia: {
     url: require( './img/58daojia490.png' ),
@@ -172,9 +174,11 @@ let shengHuo = {
 let shengHuoOrder = {
   name: '生活'
 };
-shengHuoOrder.order = Object.keys(shengHuo);
+shengHuoOrder.alter = Object.keys(shengHuo);
+shengHuoOrder.show = shengHuoOrder.alter.splice(0, 8);
 
-// 购物
+
+// 购物  1-0
 let gouWu = {
   suning: {
     url: require( './img/suningyigou490.png' ),
@@ -228,7 +232,8 @@ let gouWu = {
 let gouWuOrder = {
   name: '购物'
 };
-gouWuOrder.order = Object.keys(gouWu);
+gouWuOrder.alter = Object.keys(gouWu);
+gouWuOrder.show = gouWuOrder.alter.splice(0, 8);
 
 // 存储数据!
 export default storage = new Storage({
@@ -236,10 +241,13 @@ export default storage = new Storage({
   size: 1000,
 
   // 数据过期时间，默认一整天（1000 * 3600 * 24 毫秒），设为null则永不过期
-  defaultExpires: 1000 * 3600 * 24,
+  //defaultExpires: 1000 * 3600 * 24,
+  defaultExpires: 1000 * 2,
 
   // 读写时在内存中缓存数据。默认启用。
   enableCache: true,
+
+  sync: {}
 });
 
 //// 设备数据
@@ -252,61 +260,62 @@ export default storage = new Storage({
 //  }
 //});
 
-// 保存数据 订餐 : 1
+// 保存数据 订餐 : 0-0
+//1000 * 3600 * 24 * 330
 storage.save({
-    key: 'tab', 
-    id: 'dingCan',
+    key: 'tab1',
+    id: '0',
     rawData: dingCan,
-    expires: 1000 * 3600 * 24 * 330  //330天
+    expires: 1000 * 1  //330天
   });
 storage.save({
-  key: 'tabIndex', 
-  id: 'dingCan',
+  key: 'tabIndex1',
+  id: '0',
   rawData: dingCanOrder,
   expires: 1000
 });
 
-// 保存数据 交通 : 2
+// 保存数据 交通 : 0-1
 storage.save({
-  key: 'tab', 
-  id: 'jiaoTong',
+  key: 'tab1',
+  id: '1',
   rawData: jiaoTong,
-  expires: 1000 * 3600 * 24 * 330  //330天
+  expires: 1000 * 1  //330天
 });
 storage.save({
-  key: 'tabIndex', 
-  id: 'jiaoTong',
+  key: 'tabIndex1',
+  id: '1',
   rawData: jiaoTongOrder,
   expires: 1000
 });
 
-// 保存数据 生活 : 3
+// 保存数据 生活 : 0-2
 storage.save({
-  key: 'tab', 
-  id: 'shengHuo',
+  key: 'tab1',
+  id: '2',
   rawData: shengHuo,
-  expires: 1000 * 3600 * 24 * 330  //330天
+  expires: 1000 * 1  //330天
 });
 storage.save({
-  key: 'tabIndex', 
-  id: 'shengHuo',
+  key: 'tabIndex1',
+  id: '2',
   rawData: shengHuoOrder,
   expires: 1000
 });
 
-// 保存数据 购物 : 2-1
+// 保存数据 购物 : 1-0
 storage.save({
-  key: 'tab', 
-  id: 'gouWu',
+  key: 'tab2',
+  id: '0',
   rawData: gouWu,
-  expires: 1000 * 3600 * 24 * 330  //330天
+  expires: 1000 * 1  //330天
 });
 storage.save({
-  key: 'tabIndex', 
-  id: 'gouWu',
+  key: 'tabIndex2',
+  id: '0',
   rawData: gouWuOrder,
   expires: 1000
 });
+
 // 全局中使用!!! 类似localstorage, 注意引用顺序
 global.storage = storage;
-

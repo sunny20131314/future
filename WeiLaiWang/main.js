@@ -18,13 +18,36 @@ import {
 
 import storage from './storage';
 import ViewPager from 'react-native-viewpager';
+let tabs = [],
+  tabIndexs = [];
+// 获取到第一个tab数据
+storage.getBatchDataWithIds({
+    key: 'tab1',
+    ids: ['0', '1', '2']
+  })
+  .then(res => {
+    // 获取到的每个数据
+    tabs.push(res);
+  }).catch(err => {
+  console.log(err);
+});
+storage.getBatchDataWithIds({
+    key: 'tabIndex1',
+    ids: ['0', '1', '2']
+  })
+  .then(res => {
+    // 获取到的每个数据
+    tabIndexs.push(res);
+  }).catch(err => {
+  console.log(err);
+});
 
 import Header from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
 import Ad from './ad';
 import SearchComponent from './search';
-let Tab = require('./tab');
+import Tab from './tab';
 import DragBtnContainer from './dragBtn.expert';
 import DeliveryBtn from './deliveryBtn';
 import BdBtm from './bd-btm';
@@ -49,10 +72,12 @@ export default class Main extends Component {
   constructor(props) {
     super(props);
 
+    this.tab = tabs && tabIndexs;
     this.state = {
       isRefreshing: true,
       activeBtn: 'yuantong'
-    }
+    };
+    this.navigator = this.props.navigator;
   }
 
   static propTypes = {
@@ -84,14 +109,19 @@ export default class Main extends Component {
           <View style={styles.searchBaiDu}>
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
           </View>
-
-          {
-            // 轮播图
+          {  // 轮播图
+            tabs.map((tab, i) => (
+              <Tab
+                style={styles.viewpager}
+                navigator={this.navigator}
+                onJump={this._onJump.bind(this)}
+                data={tab}
+                order={tabIndexs[i]}
+                index={'tab' + i}
+                key={'tab' + i}
+              />
+            ))
           }
-          <View style={styles.container}>
-            <Tab style={styles.viewpager}/>
-          </View>
-
           {
             // 跳转drag
           }
@@ -180,8 +210,7 @@ export default class Main extends Component {
   }
 
   _onJumpDrag() {
-    const { navigator } = this.props;
-    navigator.replace({
+    this.navigator.replace({
       name: 'drag',
       component: DragBtnContainer,
       params: {
@@ -196,12 +225,12 @@ export default class Main extends Component {
     });
   }
 
-  _onSearch(url) {
-    const { navigator } = this.props;
+  _onJump(url) {
+    // 跳转到url
 
     // 新开一个 webview...
-    if(navigator) {
-      navigator.push({
+    if(this.navigator) {
+      this.navigator.push({
         name: 'webView',
         component: WebViewCom,
         params: {
@@ -212,12 +241,12 @@ export default class Main extends Component {
   }
 
   _onSearchBaiDu(val) {
-    this._onSearch( 'http://www.baidu.com/s?wd=' + val );
+    this._onJump( 'http://www.baidu.com/s?wd=' + val );
   }
 
   _onSearchDelivery(val) {
     // 检测数据类型为 number --
-    this._onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
+    this._onJump( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
   }
 
   _onRefresh() {

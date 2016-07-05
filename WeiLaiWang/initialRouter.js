@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import Main from './main';
-export default class RouteComponent extends React.Component {
+export default class RouteComponent extends Component {
   render() {
     return (
       <Navigator
@@ -21,10 +21,9 @@ export default class RouteComponent extends React.Component {
         //        return Navigator.SceneConfigs.HorizontalSwipeJumpFromRight;
         //      }}
         renderScene={(route, navigator) => {
-                let Component = route.component;
-
+                let Components = route.component;
                 return (
-                  <Component
+                  <Components
                     {...route.params}
                     name={route.name}
                     navigator={navigator}
