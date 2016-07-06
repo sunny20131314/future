@@ -7,6 +7,7 @@
 import React, {Component} from 'react';
 import ReactNative, {
   AppRegistry,
+  BackAndroid,
   Dimensions,
   View,
   WebView,
@@ -23,7 +24,8 @@ export default class WebViewCom extends Component {
   constructor(props) {
     super(props);
 
-    alert(this.props.url);
+    this.navigator = this.props.navigator;
+
     this.state = {
       url: this.props.url,
       title: 'No Page Loaded',
@@ -41,27 +43,29 @@ export default class WebViewCom extends Component {
   render() {
     return (
       <View style={[styles.container]}>
-        <View style={[styles.navBarRow]}>
-          <TouchableOpacity
-            onPress={this.goBack.bind(this)}
-            style={this.state.backButtonEnabled ? styles.navButton : styles.disabledButton}>
-            <Text style={styles.text}>
-              {'<'}
-            </Text>
-          </TouchableOpacity>
-          <Text style={[styles.title, {width: WIDTH - 80, textAlign: 'center'}]} numberOfLines={1}>{this.state.title}</Text>
-          <TouchableOpacity
-            onPress={this.pressReturn.bind(this)}
-          >
-            <Image
-              source={require('./img/logo.jpg')}
-              style={styles.returnImg}
-            />
-          </TouchableOpacity>
-        </View>
+        {!this.props.noTitle && (
+          <View style={[styles.navBarRow]}>
+            <TouchableOpacity
+              onPress={this.goBack.bind(this)}
+              style={this.state.backButtonEnabled ? styles.navButton : styles.disabledButton}>
+              <Text style={styles.text}>
+                {'<'}
+              </Text>
+            </TouchableOpacity>
+            <Text style={[styles.title, {width: WIDTH - 80, textAlign: 'center'}]} numberOfLines={1}>{this.state.title}</Text>
+            <TouchableOpacity
+              onPress={this.pressReturn.bind(this)}
+            >
+              <Image
+                source={require('./img/logo.jpg')}
+                style={styles.returnImg}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
         <WebView
           ref={'webview'}
-          automaticallyAdjustContentInsets={false}
+          automaticallyAdjustContentInsets={true}
           style={styles.webView}
           source={{uri: this.state.url}}
           javaScriptEnabled={true}
@@ -77,6 +81,12 @@ export default class WebViewCom extends Component {
     );
   }
 
+  componentDidMount() {
+    BackAndroid.addEventListener('hardwareBackPress', function() {
+      return this.goBack();
+    });
+  }
+
   onError() {
     Alert.alert(
       '提示: ',
@@ -84,16 +94,34 @@ export default class WebViewCom extends Component {
     );
   }
 
+  returnMain() {
+    let WebViewNews = this.props.WebViewNews;
+    WebViewNews && WebViewNews.goBack();    // 回到初始页面
+    this.navigator.popToTop();  // 回到最顶层的路由
+  }
+  pressReturn() {
+    this.returnMain();
+  }
+
   goBack() {
-    this.refs['webview'].goBack();
+    let len = this.navigator.getCurrentRoutes().length;
+    console.log(len, 'length');
+    // HACK 新闻那块 webview, push了两次, 会一直都是3??? why?
+    //len = this.props.WebViewNews ? len - 1 : len;
+    if ( len > 2 ){
+      this.refs['webview'].goBack();
+      return true;
+    }
+    if (len === 2){
+      this.returnMain();
+    }
+    return false;
   }
 
   onShouldStartLoadWithRequest(event) {
     this.setState({
       titleOri: event.title
     });
-    console.log(event.titleOri);
-
     return true;
   }
 
@@ -115,12 +143,6 @@ export default class WebViewCom extends Component {
       url: navState.url,
     });
   }
-
-  pressReturn() {
-    const { navigator } = this.props;
-    navigator && navigator.pop();
-  }
-
 }
 
 var styles = StyleSheet.create({

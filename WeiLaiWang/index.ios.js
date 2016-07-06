@@ -7,6 +7,8 @@ import {
   AppRegistry
 } from 'react-native';
 
-import InitialRouter from './initialRouter';
+//import InitialRouter from './initialRouter';
+//AppRegistry.registerComponent('WeiLaiWang', () => InitialRouter);
 
-AppRegistry.registerComponent('WeiLaiWang', () => InitialRouter);
+let MyComponent = require('./dragBtn');
+AppRegistry.registerComponent('WeiLaiWang', () => MyComponent);

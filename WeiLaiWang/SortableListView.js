@@ -9,8 +9,8 @@ import {
   PanResponder,
   TouchableWithoutFeedback
 } from 'react-native';
-
 let HEIGHT = Dimensions.get('window').height;
+
 var Row = React.createClass({
   shouldComponentUpdate: function(props) {
     if (props.hovering !== this.props.hovering) return true;
@@ -36,8 +36,13 @@ var Row = React.createClass({
     //let activeData = this.props.list.state.active;
     //let activeIndex = activeData ? Number(activeData.rowData.index) : -5;
     //let shouldDisplayHovering = activeIndex !== Number(this.props.rowData.index);
-    let Row = React.cloneElement(this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active), {sortHandlers: {onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel}, onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel});
-    return <View onLayout={this.props.onRowLayout} style={this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : null} ref="view">
+    let Row = React.cloneElement(
+      this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active),
+        {sortHandlers: {onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel},
+        onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel});
+    return <View onLayout={this.props.onRowLayout}
+                 style={[this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : null, {height: 100,}]}
+                 ref="view">
           {this.props.active && this.props.list.state.hovering && this.props._legacySupport ? null : Row}
         </View>
   }
@@ -334,6 +339,7 @@ var SortableListView = React.createClass({
         enableEmptySections={true}
         {...this.props}
         {...this.state.panResponder.panHandlers}
+        contentContainerStyle={this.props.style}
         ref="list"
         dataSource={dataSource}
         initialListSize={this.props.data.length}
@@ -354,3 +360,4 @@ var SortableListView = React.createClass({
 });
 
 module.exports = SortableListView;
+

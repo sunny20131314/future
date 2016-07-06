@@ -22,7 +22,7 @@ export default class Ad extends Component {
 
   render() {
     return (
-      <View style={styles.header}>
+      <View style={[styles.header, this.props.style]}>
         <TouchableHighlight
           activeOpacity={.8}
           onPress={() => console.log('press')}
@@ -47,7 +47,5 @@ const styles = StyleSheet.create({
   },
   ad: {
     height: 77,
-    marginTop: 12,
-    marginBottom: 12,
   }
 });

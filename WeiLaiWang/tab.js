@@ -18,34 +18,31 @@ import {
   Platform,
 } from 'react-native';
 var ViewPager = require('react-native-viewpager');
+
 import DragBtnContainer from './dragBtn.expert';
 
-
-// 计算每个image的大小,高宽和图等比例!
-let WIDTH = Dimensions.get('window').width;
-let HEIGHT = Dimensions.get('window').height;
-let width = (WIDTH-4)/2;
-var height = width/490*245;
-
-console.log(width, height, 'width, height');
 export default class Tab extends Component {
   constructor(props) {
     super(props);
 
-    this.index = this.props.index; // string: 记录是第几个tab
-    this.data = this.props.data;   // arr: 所有数据 []
-    this.len = this.data.length;
-    this.show = [];
+    this.index = this.props.index; // number: 记录是第几个tab
+    this.imgLayout = this.props.deviceLayout.imgLayout;
+    this.data = [];
     this.title = [];
+    this.show = [];
     this.alter = [];
+    let order = this.props.order;  // arr: 记录显示顺序及tab [ show :Array[8], alter: Array[]], [show :Array[8]]
+    let datas = this.props.data;  // arr: 所有数据 []
+    this.len = order.length;
 
-    let order = this.props.order;  // arr: 记录显示顺序及tab [name: '', show :Array[8]], [name: '', show :Array[8]]
+
     for (let i = 0, len = this.len; i !== len; i++ ){
-      this.title[i] = order[i].name;
+      this.data[i] = datas[i].data;
+      this.title[i] = datas[i].name;
       this.show[i] = order[i].show;
       this.alter[i] = order[i].alter;
     }
-    console.log(this.index, this.data, this.show, this.title, 'this.index, this.data, this.order, this.title,');
+    console.log(this.index, this.data, this.show, this.title, this.alter,'this.index, this.data, this.order, this.title,this.alter');
 
 
     var dataSource = new ViewPager.DataSource({
@@ -57,8 +54,9 @@ export default class Tab extends Component {
       dataSource: dataSource.cloneWithPages(this.show),
     }
   }
+
   static propTypes = {
-    index: React.PropTypes.string.isRequired,
+    index: React.PropTypes.number.isRequired,
     data: React.PropTypes.array.isRequired,
     order: React.PropTypes.array.isRequired
   };
@@ -76,7 +74,7 @@ export default class Tab extends Component {
         renderPage={this._renderPage.bind(this)}
         renderPageIndicator={this._renderPageIndicator.bind(this)}
         onChangePage={this._onChangePage.bind(this)}
-        isLoop={true}
+        isLoop={this.len > 1}
         autoPlay={false}/>
     );
   }
@@ -84,7 +82,7 @@ export default class Tab extends Component {
     let isChange = this.state.activePage === i;
     return (
       <TouchableHighlight
-        key={'btn' + i}
+        key={this.index + 'btn' + i }
         activeOpacity={.8}
         underlayColor="rgba(255, 255, 255, 0.6)"
         onPress={() => {
@@ -119,6 +117,7 @@ export default class Tab extends Component {
     for (let i = 0, len = this.len; i !== len; i++) {
       indicators.push(this._renderIndicator(i, goToPage, this.title[i]));
     }
+    const { navigator } = this.props;
     let activePage = this.state.activePage;
     return (
       <View style={styles.indicator}>
@@ -126,20 +125,19 @@ export default class Tab extends Component {
         <TouchableHighlight
           style={styles.edit}
           onPress={() => {
-            console.log('press');
-            const { navigator } = this.props;
             navigator.replace({
               name: 'edit',
               component: DragBtnContainer,
               params: {
                 url: '',
+                layout: this.props.deviceLayout,
                 index: this.index,  //第几个tab
                 show: this.show[activePage],    //显示的前8条数据
                 alter: this.alter[activePage],    //显示的剩余数据
                 data: this.data[activePage],    //该页面的全部数据
               }
             });
-            }}
+          }}
           underlayColor="transparent"
         >
           <Text style={styles.editText}>编辑</Text>
@@ -163,7 +161,7 @@ export default class Tab extends Component {
           >
             <Image
               source={dataAll[data].url}
-              style={styles.img}
+              style={this.imgLayout}
               resizeMode='contain'
             />
           </TouchableHighlight>
@@ -184,32 +182,32 @@ export default class Tab extends Component {
   }
 }
 
-class TouchImage extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.url !== this.props.url;
-  }
-
-  render() {
-    return (
-      //<View style={styles.imgCon}>
-        <TouchableHighlight
-          onPress={() => console.log('press')}
-          underlayColor="transparent"
-        >
-          <Image
-            source={this.props.url}
-            style={styles.img}
-            resizeMode='contain'
-          />
-        </TouchableHighlight>
-      //</View>
-    )
-  }
-}
+//class TouchImage extends Component {
+//  constructor(props) {
+//    super(props);
+//  }
+//
+//  shouldComponentUpdate(nextProps, nextState) {
+//    return nextProps.url !== this.props.url;
+//  }
+//
+//  render() {
+//    return (
+//      //<View style={styles.imgCon}>
+//        <TouchableHighlight
+//          onPress={() => console.log('press')}
+//          underlayColor="transparent"
+//        >
+//          <Image
+//            source={this.props.url}
+//            style={this.imgLayout}
+//            resizeMode='contain'
+//          />
+//        </TouchableHighlight>
+//      //</View>
+//    )
+//  }
+//}
 
 var styles = StyleSheet.create({
   page: {
@@ -252,10 +250,5 @@ var styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center'
   },
-  img: {
-    width: width,
-    height: height,
-    marginBottom: 4,
-  }
 });
 

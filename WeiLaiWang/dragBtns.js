@@ -1,6 +1,7 @@
 /**
  * Created by sunny on 16/6/28.
- *
+ * 相关的数据传递
+ * 打算在dragBtn.expert 的基础上修改,获取相关数据!!!
  */
 
 
