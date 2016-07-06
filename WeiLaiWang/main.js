@@ -173,12 +173,15 @@ export default class Main extends Component {
                   index={i}
                   key={'tab' + i}
                   deviceLayout={{
-                      tabWidth: tabWidth,
-                      tabHeight: tabHeight,
-                      baseHeight: baseHeight,
-                      WIDTH: WIDTH,
-                      HEIGHT: HEIGHT,
-                    }}
+                    imgLayout: {
+                      width: tabWidth,
+                      height: tabHeight,
+                      marginBottom: 4,
+                    },
+                    baseHeight: baseHeight,
+                    WIDTH: WIDTH,
+                    HEIGHT: HEIGHT,
+                  }}
                 />
               )})
           }
