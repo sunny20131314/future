@@ -126,14 +126,9 @@ export default class WebViewCom extends Component {
     console.log(navState,this.state.url);
 
     // TODO 为了解决 webview 中地址搜索的两个链接的不停跳转(重定向)
-    if( this.state.url !== this.props.url ) {
-      this.setState({
-        title: navState.title
-      });
-      console.info('~~~~', this.state.AllUrl);
-      return false;
-    }
-    this.setState({
+    // 每次跳转页面的时候,会触发两次: 第一次: navigationType: click, other(push);
+    // 第二次: 拿到页面的相关数据  米有 navigationType
+    !navState.navigationType && this.setState({
       loading: navState.loading,
       title: navState.title,
       backButtonEnabled: navState.canGoBack,

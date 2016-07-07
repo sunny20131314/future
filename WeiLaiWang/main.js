@@ -55,8 +55,6 @@ storage.load({
 
 getDate();
 
-import ViewPager from 'react-native-viewpager';
-
 import Header from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
@@ -138,7 +136,18 @@ export default class Main extends Component {
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
           </View>
           <View style={styles.tabCon}>
+            <WebView
+                    key={'webView'}
+                    ref={(webView) => this.WebViewNews = webView}
+                    style={{flex:1, height: 120,}}
+                    onNavigationStateChange={this._onNavigationStateChange.bind(this)}
+                    bounces={false}
+                    scrollEnabled={false}
+                    source={{uri: this.url}}
+                    scalesPageToFit={true}
+                  />
             { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
+              // 保存在state, 加载好了之后, state数据 -- 渲染
               dataTabs && <Tab
                   style={styles.viewpager}
                   navigator={this.navigator}
@@ -309,8 +318,8 @@ export default class Main extends Component {
   _onNavigationStateChange(nav) {
     let url = nav.url;
     if(url !== this.url && this.navigator) {
-      console.log('push');
-      this.navigator.push({
+      console.log('push', url);
+      nav.navigationType && this.navigator.push({
         name: 'webView',
         component: WebViewCom,
         params: {
