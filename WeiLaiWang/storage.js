@@ -26,7 +26,7 @@ tab0[0] = {
   name: '订餐',
   data: {
     baiduwaimai: {
-      url: require( './img/budingwaimai490.png' ),
+      url: require( './img/baiduwaimai490.png' ),
       href: 'http://waimai.baidu.com'
     },
     meituan: {
@@ -232,14 +232,18 @@ tab1[0] = {
   }
 };
 
+
+
+// tab页数据的排列顺序
 for(let m = 0, len = dataTabs.length; m !== len; m++ ){
   let tab = dataTabs[m];
   let tabIndex = dataTabOrders[m] = []; // 传递每一个tab的数据
   let indexLen = tab.length;
   for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
     let tabIndexArr = tabIndex[n] = {};
-    tabIndexArr.alter = Object.keys(tab[n].data);   // 保存剩余可选数据的顺序
-    tabIndexArr.show = tabIndex[n].alter.splice(0, 8);// 保存显示的数据的顺序
+    tabIndexArr.order = Object.keys(tab[n].data);   // 保存全部数据的顺序
+    //tabIndexArr.alter = Object.keys(tab[n].data);   // 保存剩余可选数据的顺序
+    //tabIndexArr.show = tabIndex[n].alter.splice(0, 8);// 保存显示的数据的顺序
   }
 }
 
@@ -255,8 +259,38 @@ export default storage = new Storage({
   // 读写时在内存中缓存数据。默认启用。
   enableCache: true,
 
-  sync: {}
+  sync: {
+    //http://f.apiplus.cn/ssq.json
+    lottery(params){
+      let { id, resolve, reject } = params;
+      fetch('http://f.apiplus.cn/ssq-1.json', {
+        method: 'GET',
+      }).then(response => {
+        console.log(response, 'response');
+        return response.json();
+      }).then(json => {
+        console.log(json, 'json');
+        //if(json && json.user){
+        //  storage.save({
+        //    key: 'user',
+        //    id,
+        //    rawData: json.user
+        //  });
+        //  // 成功则调用resolve
+        //  resolve && resolve(json.user);
+        //}
+        //else{
+        //  // 失败则调用reject
+        //  reject && reject(new Error('data parse error'));
+        //}
+      }).catch(err => {
+        console.warn(err);
+        reject && reject(err);
+      });
+    }
+  }
 });
+
 
 // 所有tab页的数据
 storage.save({
@@ -268,7 +302,7 @@ storage.save({
 storage.save({
   key: 'dataTabOrders',
   rawData: dataTabOrders,
-  expires: 1000 * 2  // 1s
+  expires: 1000 * 2  // 2s
 });
 //module.exports = dataTabs;
 

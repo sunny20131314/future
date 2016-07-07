@@ -1,5 +1,6 @@
 /**
  * Created by sunzhimin on 16/6/20.
+ * 存储当前的元素, 放在全局(相对于当前页面)
  */
 
 import React, { Component } from 'react';
@@ -12,13 +13,15 @@ import {
   Image,
   View
 } from 'react-native';
+import SearchComponent from './search';
 
-export default class SearchComponent extends Component {
+class DeliveryBtn extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      activeBtn: this.props.activeBtn
+      activeBtn: this.props.activeBtn,
+      preActiveBtn: this.props.activeBtn,
     }
   }
 
@@ -44,16 +47,76 @@ export default class SearchComponent extends Component {
 
   _onClick() {
     let id = this.props.id;
-    if ( id === this.props.activeBtn ){
-      return false;
-    }
     console.log(id);
     this.props.setType( id );
   }
 }
 
+var DeliveryArr = [
+  {id: 'yuantong', val: '圆通'},
+  {id: 'yunda', val: '韵达'},
+  {id: 'shentong', val: '申通'},
+  {id: 'zhongtong', val: '中通'},
+  {id: 'shunfeng', val: '顺丰'},
+  {id: 'ems', val: 'EMS'},
+  {id: 'zhaijisong', val: '宅急送'},
+  {id: 'quanfengkuaidi', val: '全峰'},
+  {id: 'tiantian', val: '天天'},
+  {id: 'youshuwuliu', val: '优速'},
+  {id: 'rufengda', val: '如风达'},
+  {id: 'youzhengguonei', val: '包裹'}
+];
+
+export default class DeliveryBtnCon extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      activeBtn: this.props.activeBtn,
+      preActiveBtn: this.props.activeBtn,
+    }
+  }
+
+  render() {
+    return (
+      <View>
+        <SearchComponent placeholder="请输入快递单号..." keyboardType='numeric' onSearch={this._onSearchDelivery.bind(this)}/>
+        <View style={styles.deliveryBtns}>
+          {
+            DeliveryArr.map((arr) => <DeliveryBtn
+              id={arr.id}
+              val={arr.val}
+              key={arr.id}
+              activeBtn={this.state.activeBtn}
+              setType={this._setType.bind(this)}
+            />)
+          }
+        </View>
+      </View>
+    );
+  }
+
+  _onSearchDelivery(val) {
+    // 检测数据类型为 number --
+    this.props.onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
+  }
+
+  _setType(id) {
+    this.setState({
+      activeBtn: id
+    });
+  }
+}
 
 const styles = StyleSheet.create({
+  deliveryBtns: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 15,
+    marginBottom: 15,
+  },
   btnItem: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -69,7 +132,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     backgroundColor: '#fff',
-    //borderRadius: 2,
+    borderRadius: 2,
     textAlign: 'center',
   },
 });

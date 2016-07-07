@@ -113,7 +113,7 @@ export default class Mess extends Component {
             </Text>
             <TouchableHighlight
               activeOpacity={.8}
-              onPress={() => console.log('press')}
+              onPress={() => this.props.onJump('http://3g.d1xz.net/astro/')}
               underlayColor="rgba(255, 255, 255, 0.6)"
               style={styles.hdBottomItem}
             >
@@ -126,6 +126,50 @@ export default class Mess extends Component {
         <View style={styles.hdCenter}>
           <TouchableHighlight
             activeOpacity={.8}
+            onPress={() => console.log('press')}
+            underlayColor="rgba(255, 255, 255, 0.6)"
+          >
+            <View style={styles.flexColumn}>
+              <View style={styles.hdTop}>
+                <Text style={styles.textLarge}>
+                  07月07日
+                </Text>
+              </View>
+              <View style={styles.hdMedium}>
+                <Text style={styles.textMedium}>
+                  星期四
+                </Text>
+              </View>
+            </View>
+          </TouchableHighlight>
+          <View style={styles.hdBottom}>
+            <TouchableHighlight
+              activeOpacity={.8}
+              onPress={() => this.props.onJump('http://m.edu.k618.cn/camp/')}
+              underlayColor="rgba(255, 255, 255, 0.6)"
+              style={styles.hdBottomItem}
+            >
+              <Text>
+                图片
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              activeOpacity={.8}
+              onPress={() => this.props.onJump('http://m.ziroom.com/')}
+              underlayColor="rgba(255, 255, 255, 0.6)"
+              style={styles.hdBottomItem}
+            >
+              <Text>
+                租房
+              </Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+        <View style={styles.hdRight}>
+          <TouchableHighlight
+            activeOpacity={.8}
+            style={styles.date}
+
             onPress={() => console.log('press')}
             underlayColor="rgba(255, 255, 255, 0.6)"
           >
@@ -145,54 +189,7 @@ export default class Mess extends Component {
           <View style={styles.hdBottom}>
             <TouchableHighlight
               activeOpacity={.8}
-              onPress={() => console.log('press')}
-              underlayColor="rgba(255, 255, 255, 0.6)"
-              style={styles.hdBottomItem}
-            >
-              <Text>
-                图片
-              </Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              activeOpacity={.8}
-              onPress={() => console.log('press')}
-              underlayColor="rgba(255, 255, 255, 0.6)"
-              style={styles.hdBottomItem}
-            >
-              <Text>
-                租房
-              </Text>
-            </TouchableHighlight>
-          </View>
-        </View>
-        <View style={styles.hdRight}>
-          <TouchableHighlight
-            activeOpacity={.8}
-            style={styles.date}
-          >
-            <TouchableHighlight
-              activeOpacity={.8}
-              onPress={() => console.log('press')}
-              underlayColor="rgba(255, 255, 255, 0.6)"
-            >
-              <View style={styles.flexColumn}>
-                <View style={styles.hdTop}>
-                  <Text style={styles.textLarge}>
-                    PM 2.5
-                  </Text>
-                </View>
-                <View style={styles.hdMedium}>
-                  <Text style={styles.textMedium}>
-                    145
-                  </Text>
-                </View>
-              </View>
-            </TouchableHighlight>
-          </TouchableHighlight>
-          <View style={styles.hdBottom}>
-            <TouchableHighlight
-              activeOpacity={.8}
-              onPress={() => console.log('press')}
+              onPress={() => this.props.onJump('http://m.zhcw.com/')}
               underlayColor="rgba(255, 255, 255, 0.6)"
             >
               <View>

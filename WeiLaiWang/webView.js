@@ -52,9 +52,9 @@ export default class WebViewCom extends Component {
                 {'<'}
               </Text>
             </TouchableOpacity>
-            <Text style={[styles.title, {width: WIDTH - 80, textAlign: 'center'}]} numberOfLines={1}>{this.state.title}</Text>
+            <Text style={[styles.title]} numberOfLines={1}>{this.state.title}</Text>
             <TouchableOpacity
-              onPress={this.pressReturn.bind(this)}
+              onPress={this.returnMain.bind(this)}
             >
               <Image
                 source={require('./img/logo.jpg')}
@@ -98,9 +98,6 @@ export default class WebViewCom extends Component {
     let WebViewNews = this.props.WebViewNews;
     WebViewNews && WebViewNews.goBack();    // 回到初始页面
     this.navigator.popToTop();  // 回到最顶层的路由
-  }
-  pressReturn() {
-    this.returnMain();
   }
 
   goBack() {
@@ -188,6 +185,8 @@ var styles = StyleSheet.create({
   title: {
     color: 'white',
     fontSize: 13,
+    width: WIDTH - 80,
+    textAlign: 'center'
   },
   returnImg: {
     width: 40,

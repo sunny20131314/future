@@ -41,7 +41,7 @@ var Row = React.createClass({
         {sortHandlers: {onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel},
         onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel});
     return <View onLayout={this.props.onRowLayout}
-                 style={[this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : null, {height: 100,}]}
+                 style={[this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : this.props.imgLayout]}
                  ref="view">
           {this.props.active && this.props.list.state.hovering && this.props._legacySupport ? null : Row}
         </View>
@@ -58,7 +58,7 @@ var SortRow = React.createClass({
         position: 'absolute',
         left: 0,
         right: 0,
-        opacity: .2,
+        opacity: .8,
         height: layout.frameHeight,
         overflow: 'hidden',
         backgroundColor: 'transparent',
@@ -336,13 +336,13 @@ var SortableListView = React.createClass({
     let dataSource = this.state.ds.cloneWithRows(this.props.data, this.order);
     return <View ref="wrapper" style={{flex: 1}} onLayout={()=>{}}>
       <ListView
+        contentContainerStyle={this.props.styles}
         enableEmptySections={true}
         {...this.props}
         {...this.state.panResponder.panHandlers}
-        contentContainerStyle={this.props.style}
         ref="list"
         dataSource={dataSource}
-        initialListSize={this.props.data.length}
+        initialListSize={this.props.order.length}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
           if (this.props.onScroll) this.props.onScroll(e);

@@ -21,24 +21,39 @@ import storage from './storage';
 let dataTabs;  //所有tab页数据
 let dataTabOrders;  //所有tab页数据的相关顺序
 
+function getDate() {
+  storage.load({
+    key: 'dataTabs',
+    autoSync: true,
+    syncInBackground: true
+  }).then(ret => {
+    dataTabs = ret;
+  }).catch(err => {
+    console.info(err, '错误');
+  });
+  storage.load({
+    key: 'dataTabOrders',
+    autoSync: true,
+    syncInBackground: true
+  }).then(ret => {
+    dataTabOrders = ret;
+    console.info(dataTabOrders, 'dataTabOrders');
+  }).catch(err => {
+    console.info(err, '错误');
+  });
+}
+
 storage.load({
-  key: 'dataTabs',
+  key: 'lottery',
   autoSync: true,
   syncInBackground: true
 }).then(ret => {
-  dataTabs = ret;
+  console.info(ret, 'lottery');
 }).catch(err => {
   console.info(err, '错误');
 });
-storage.load({
-  key: 'dataTabOrders',
-  autoSync: true,
-  syncInBackground: true
-}).then(ret => {
-  dataTabOrders = ret;
-}).catch(err => {
-  console.info(err, '错误');
-});
+
+getDate();
 
 import ViewPager from 'react-native-viewpager';
 
@@ -48,23 +63,8 @@ import BdHd from './bd-hd';
 import Ad from './ad';
 import SearchComponent from './search';
 import Tab from './tab';
-import DeliveryBtn from './deliveryBtn';
+import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
-
-var DeliveryArr = [
-  {id: 'yuantong', val: '圆通'},
-  {id: 'yunda', val: '韵达'},
-  {id: 'shentong', val: '申通'},
-  {id: 'zhongtong', val: '中通'},
-  {id: 'shunfeng', val: '顺丰'},
-  {id: 'ems', val: 'EMS'},
-  {id: 'zhaijisong', val: '宅急送'},
-  {id: 'quanfengkuaidi', val: '全峰'},
-  {id: 'tiantian', val: '天天'},
-  {id: 'youshuwuliu', val: '优速'},
-  {id: 'rufengda', val: '如风达'},
-  {id: 'youzhengguonei', val: '包裹'}
-];
 
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
@@ -79,16 +79,29 @@ function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
 imgLayout();
 let tabHeight = tabWidth / 490 * 245;
 let tabHeights = ( tabHeight + 4 ) * 4 +48;
-console.log(tabWidth, tabHeight, tabHeights, 'tabWidth, tabHeight, tabHeights,' );
+
 export default class Main extends Component {
   constructor(props) {
     super(props);
 
+    let noRefresh = this.props.noRefresh;
+    noRefresh && getDate();
     this.state = {
-      isRefreshing: true,
+      isRefreshing: !noRefresh,
       activeBtn: 'yuantong',
-      url: 'http://m.k618.cn/dhy_news/',  //新闻页面的地址
     };
+
+    this.deviceLayout={
+      imgLayout: {
+        width: tabWidth,
+        height: tabHeight,
+        marginBottom: 4,
+      },
+      baseHeight: baseHeight,
+      WIDTH: WIDTH,
+      HEIGHT: HEIGHT,
+    };
+
     this.navigator = this.props.navigator;
   }
 
@@ -101,8 +114,7 @@ export default class Main extends Component {
   url = 'http://m.k618.cn/dhy_news/';  //新闻页面的地址
 
   render() {
-    console.log(this.state.url, 'url');
-
+    console.log('render');
     return (
       <View style={styles.container}>
         <Header/>
@@ -120,7 +132,7 @@ export default class Main extends Component {
             />
           }
         >
-          <BdHd/>
+          <BdHd onJump={this._onJump.bind(this)} />
           <Ad style={{marginTop: 12,marginBottom: 12,}}/>
           <View style={styles.searchBaiDu}>
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
@@ -135,16 +147,7 @@ export default class Main extends Component {
                   order={dataTabOrders[0]}
                   index={0}
                   key={'tab' + 0}
-                  deviceLayout={{
-                        imgLayout: {
-                          width: tabWidth,
-                          height: tabHeight,
-                          marginBottom: 4,
-                        },
-                        baseHeight: baseHeight,
-                        WIDTH: WIDTH,
-                        HEIGHT: HEIGHT,
-                      }}
+                  deviceLayout={this.deviceLayout}
                 />
             }
           </View>
@@ -159,7 +162,7 @@ export default class Main extends Component {
                   onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                   bounces={false}
                   scrollEnabled={false}
-                  source={{uri: this.state.url}}
+                  source={{uri: this.url}}
                   scalesPageToFit={true}
                 />
               }
@@ -172,56 +175,72 @@ export default class Main extends Component {
                   order={dataTabOrders[i]}
                   index={i}
                   key={'tab' + i}
-                  deviceLayout={{
-                    imgLayout: {
-                      width: tabWidth,
-                      height: tabHeight,
-                      marginBottom: 4,
-                    },
-                    baseHeight: baseHeight,
-                    WIDTH: WIDTH,
-                    HEIGHT: HEIGHT,
-                  }}
+                  deviceLayout={this.deviceLayout}
                 />
               )})
           }
           {
             // 快递页面
+            //<View>
+            //  <TouchableHighlight
+            //    activeOpacity={.8}
+            //    onPress={() => console.log('press')}
+            //    underlayColor="rgba(255, 255, 255, 0.6)"
+            //    style={{
+            //     width: 86,
+            //     marginLeft: 16,
+            //     paddingLeft: 24,
+            //     paddingRight: 24,
+            //     paddingTop: 6,
+            //     paddingBottom: 6,
+            //     borderWidth: 1,
+            //     borderColor: '#ededed',
+            //     borderRadius: 4,
+            //    }}
+            //  >
+            //    <Text style={{fontSize: 18, color: '#ff5248',}}>
+            //      快递
+            //    </Text>
+            //  </TouchableHighlight>
+            //  <SearchComponent
+            //    placeholder="请输入快递单号..."
+            //    keyboardType='numeric'
+            //    onSearch={this._onSearchDelivery.bind(this)}
+            //  />
+            //  <View style={styles.deliveryBtns}>
+            //    {
+            //      DeliveryArr.map((arr) => <DeliveryBtn
+            //        id={arr.id}
+            //        val={arr.val}
+            //        key={arr.id}
+            //        activeBtn={this.state.activeBtn}
+            //        setType={this._setType.bind(this)}
+            //      />)
+            //    }
+            //  </View>
+            //</View>
           }
-          <View>
+          <View style={styles.indicator}>
             <TouchableHighlight
               activeOpacity={.8}
               onPress={() => console.log('press')}
               underlayColor="rgba(255, 255, 255, 0.6)"
               style={{
-               width: 86,
-               marginLeft: 16,
-               paddingLeft: 24,
-               paddingRight: 24,
-               paddingTop: 6,
-               paddingBottom: 6,
-               borderWidth: 1,
-               borderColor: '#ededed',
-               borderRadius: 4,
-              }}
+                width: 60,
+                marginLeft: 16,
+                paddingTop: 6,
+                paddingBottom: 6,
+                borderWidth: 1,
+                borderColor: '#ededed',
+                borderRadius: 4,
+             }}
             >
-              <Text style={{fontSize: 18, color: '#ff5248',}}>
+              <Text style={{fontSize: 18, color: '#ff5248', textAlign: 'center'}}>
                 快递
               </Text>
             </TouchableHighlight>
-            <SearchComponent placeholder="请输入快递单号..." keyboardType='numeric' onSearch={this._onSearchDelivery.bind(this)}/>
-            <View style={styles.deliveryBtns}>
-              {
-                DeliveryArr.map((arr) => <DeliveryBtn
-                  id={arr.id}
-                  val={arr.val}
-                  key={arr.id}
-                  activeBtn={this.state.activeBtn}
-                  setType={this._setType.bind(this)}
-                />)
-              }
-            </View>
           </View>
+          <DeliveryBtnCon onSearch={this._onJump.bind(this)} />
           <Ad />
           <BdBtm />
         </ScrollView>
@@ -290,6 +309,7 @@ export default class Main extends Component {
   _onNavigationStateChange(nav) {
     let url = nav.url;
     if(url !== this.url && this.navigator) {
+      console.log('push');
       this.navigator.push({
         name: 'webView',
         component: WebViewCom,
@@ -320,6 +340,12 @@ const styles = StyleSheet.create({
   },
   tabCon: {
     height: tabHeights,
+  },
+  indicator: {
+    //height: 48,
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   deliveryBtns: {
     flexDirection: 'row',

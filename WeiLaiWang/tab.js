@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 var ViewPager = require('react-native-viewpager');
 
-import DragBtnContainer from './dragBtn.expert';
+import dragBtn from './dragBtn';
 
 export default class Tab extends Component {
   constructor(props) {
@@ -29,22 +29,19 @@ export default class Tab extends Component {
     this.imgLayout = this.props.deviceLayout.imgLayout;
     this.data = [];
     this.title = [];
+    this.order = [];
     this.show = [];
     this.alter = [];
-    let order = this.props.order;  // arr: 记录显示顺序及tab [ show :Array[8], alter: Array[]], [show :Array[8]]
+    let order = this.props.order;  // arr: 记录显示顺序及tab [ order: Array[], show :Array[8], alter: Array[]], [show :Array[8]]
     let datas = this.props.data;  // arr: 所有数据 []
     this.len = order.length;
-
-
     for (let i = 0, len = this.len; i !== len; i++ ){
       this.data[i] = datas[i].data;
       this.title[i] = datas[i].name;
-      this.show[i] = order[i].show;
+      this.order[i] = order[i].order;
+      this.show[i] = order[i].order.slice(0, 8);
       this.alter[i] = order[i].alter;
     }
-    console.log(this.index, this.data, this.show, this.title, this.alter,'this.index, this.data, this.order, this.title,this.alter');
-
-
     var dataSource = new ViewPager.DataSource({
       pageHasChanged: (p1, p2) => p1 !== p2
     });
@@ -92,17 +89,11 @@ export default class Tab extends Component {
           this.setState({
             activePage: i
           });
-          console.log('go' ,i ,'~~~~');
           goToPage(i);
         }}
         style={styles.tab}
       >
-        <Text
-          style={[
-            styles.tabText,
-            isChange &&  {color: '#ff5248'}
-            ]}
-        >
+        <Text style={[styles.tabText, isChange &&  {color: '#ff5248'}]} >
           {name}
         </Text>
       </TouchableHighlight>
@@ -112,7 +103,6 @@ export default class Tab extends Component {
     // 这个数据是修改了源代码才得到的 -- this.props.i
     // 从ViewPager 传过来的参数
     let {goToPage} = props;
-    console.log(props);
     let indicators = [];
     for (let i = 0, len = this.len; i !== len; i++) {
       indicators.push(this._renderIndicator(i, goToPage, this.title[i]));
@@ -120,20 +110,24 @@ export default class Tab extends Component {
     const { navigator } = this.props;
     let activePage = this.state.activePage;
     return (
-      <View style={styles.indicator}>
+      <View
+        style={styles.indicator}
+      >
         {indicators}
         <TouchableHighlight
           style={styles.edit}
           onPress={() => {
             navigator.replace({
               name: 'edit',
-              component: DragBtnContainer,
+              component: dragBtn,
               params: {
                 url: '',
-                layout: this.props.deviceLayout,
+                deviceLayout: this.props.deviceLayout,
                 index: this.index,  //第几个tab
-                show: this.show[activePage],    //显示的前8条数据
-                alter: this.alter[activePage],    //显示的剩余数据
+                activePage: this.state.activePage,
+                order: this.order[activePage],    //显示的全部数据顺序
+                show: this.show[activePage],    //显示的前8条数据顺序
+                alter: this.alter[activePage],    //显示的剩余数据顺序
                 data: this.data[activePage],    //该页面的全部数据
               }
             });

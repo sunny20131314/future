@@ -10,5 +10,3 @@ import {
 import InitialRouter from './initialRouter';
 AppRegistry.registerComponent('WeiLaiWang', () => InitialRouter);
 
-//let MyComponent = require('./dragBtn');
-//AppRegistry.registerComponent('WeiLaiWang', () => MyComponent);
