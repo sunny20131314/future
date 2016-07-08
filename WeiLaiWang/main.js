@@ -1,7 +1,7 @@
 /**
  * Created by sunzhimin on 16/6/16.
+ * tab页全部数据: tab页数据(地址,链接), tab页数据的相关顺序(展示)
  */
-
 import React, { Component } from 'react';
 import {
   Dimensions,
@@ -18,43 +18,6 @@ import {
 } from 'react-native';
 
 import storage from './storage';
-let dataTabs;  //所有tab页数据
-let dataTabOrders;  //所有tab页数据的相关顺序
-
-function getDate() {
-  storage.load({
-    key: 'dataTabs',
-    autoSync: true,
-    syncInBackground: true
-  }).then(ret => {
-    dataTabs = ret;
-  }).catch(err => {
-    console.info(err, '错误');
-  });
-  storage.load({
-    key: 'dataTabOrders',
-    autoSync: true,
-    syncInBackground: true
-  }).then(ret => {
-    dataTabOrders = ret;
-    console.info(dataTabOrders, 'dataTabOrders');
-  }).catch(err => {
-    console.info(err, '错误');
-  });
-}
-
-storage.load({
-  key: 'lottery',
-  autoSync: true,
-  syncInBackground: true
-}).then(ret => {
-  console.info(ret, 'lottery');
-}).catch(err => {
-  console.info(err, '错误');
-});
-
-getDate();
-
 import Header from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
@@ -64,12 +27,15 @@ import Tab from './tab';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 
+global.storage = storage;
+
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
 var baseHeight = Platform.OS === 'ios' ?  0 : 10;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
+let webViewH = WIDTH / 980 * 273;
 let tabWidth ;
 function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
   tabWidth = (WIDTH-margin * (num - 1))/num;
@@ -82,11 +48,11 @@ export default class Main extends Component {
   constructor(props) {
     super(props);
 
-    let noRefresh = this.props.noRefresh;
-    noRefresh && getDate();
     this.state = {
-      isRefreshing: !noRefresh,
-      activeBtn: 'yuantong',
+      isRefreshing: true,
+      dataTabs: '',      //所有tab页数据
+      dataTabOrders: '', //所有tab页数据的相关顺序
+      lottery: '',
     };
 
     this.deviceLayout={
@@ -99,6 +65,33 @@ export default class Main extends Component {
       WIDTH: WIDTH,
       HEIGHT: HEIGHT,
     };
+
+    // 获得tab页的数据
+    storage.load({
+      key: 'dataTabs',
+      autoSync: true,
+      syncInBackground: true
+    }).then(ret => {
+      this.setState({
+        dataTabs: ret
+      });
+    }).catch(err => {
+      console.info(err, '拿不到相关数据');
+    });
+
+    // 获得tab页的相关顺序
+    storage.load({
+      key: 'dataTabOrders',
+      //autoSync: true,
+      //syncInBackground: true
+    }).then(ret => {
+      console.log(ret,'dataTabOrders');
+      this.setState({
+        dataTabOrders: ret
+      });
+    }).catch(err => {
+      console.info(err, '错误');
+    });
 
     this.navigator = this.props.navigator;
   }
@@ -113,6 +106,10 @@ export default class Main extends Component {
 
   render() {
     console.log('render');
+    let dataTabs = this.state.dataTabs;
+    let dataTabOrders = this.state.dataTabOrders;
+    let isGetData = dataTabs !== '' && dataTabOrders !== '';
+    console.log(dataTabs, dataTabOrders, 'dataTabs, dataTabOrders')
     return (
       <View style={styles.container}>
         <Header/>
@@ -136,19 +133,9 @@ export default class Main extends Component {
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
           </View>
           <View style={styles.tabCon}>
-            <WebView
-                    key={'webView'}
-                    ref={(webView) => this.WebViewNews = webView}
-                    style={{flex:1, height: 120,}}
-                    onNavigationStateChange={this._onNavigationStateChange.bind(this)}
-                    bounces={false}
-                    scrollEnabled={false}
-                    source={{uri: this.url}}
-                    scalesPageToFit={true}
-                  />
             { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
               // 保存在state, 加载好了之后, state数据 -- 渲染
-              dataTabs && <Tab
+              isGetData && <Tab
                   style={styles.viewpager}
                   navigator={this.navigator}
                   onJump={this._onJump.bind(this)}
@@ -162,12 +149,12 @@ export default class Main extends Component {
           </View>
 
           {  // 轮播图
-            dataTabs && dataTabs.map((dataTab, i) => {
+            isGetData && dataTabs.map((dataTab, i) => {
               if( !i ) {
                 return <WebView
                   key={'webView' + i}
                   ref={(webView) => this.WebViewNews = webView}
-                  style={{flex:1, height: 120,}}
+                  style={{flex:1, height: webViewH,}}
                   onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                   bounces={false}
                   scrollEnabled={false}
@@ -317,9 +304,8 @@ export default class Main extends Component {
 
   _onNavigationStateChange(nav) {
     let url = nav.url;
-    if(url !== this.url && this.navigator) {
-      console.log('push', url);
-      nav.navigationType && this.navigator.push({
+    if(nav.navigationType && url !== this.url && this.navigator) {
+      this.navigator.push({
         name: 'webView',
         component: WebViewCom,
         params: {

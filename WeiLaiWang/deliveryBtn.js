@@ -72,8 +72,8 @@ export default class DeliveryBtnCon extends Component {
     super(props);
 
     this.state = {
-      activeBtn: this.props.activeBtn,
-      preActiveBtn: this.props.activeBtn,
+      activeBtn: 'yuantong',
+      preActiveBtn: 'yuantong',
     }
   }
 

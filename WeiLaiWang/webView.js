@@ -105,14 +105,14 @@ export default class WebViewCom extends Component {
     console.log(len, 'length');
     // HACK 新闻那块 webview, push了两次, 会一直都是3??? why?
     //len = this.props.WebViewNews ? len - 1 : len;
-    if ( len > 2 ){
+    //if ( len > 2 ){
       this.refs['webview'].goBack();
-      return true;
-    }
-    if (len === 2){
-      this.returnMain();
-    }
-    return false;
+    //  return true;
+    //}
+    //if (len === 2){
+    //  this.returnMain();
+    //}
+    //return false;
   }
 
   onShouldStartLoadWithRequest(event) {

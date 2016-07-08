@@ -39,37 +39,58 @@ class Pick extends Component {
 class Ball extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      numbers: [1,2,3,4,5,6,7]
-    }
+      redBall: '',
+      blueBall: ''
+    };
+
+    // 获得六合彩信息 如何知道有了新的数据!!! 总不能一直获取吧... 何时再获取数据,而不是用缓存???
+    global.storage.load({
+      key: 'lottery',
+      autoSync: true,
+      syncInBackground: true
+    }).then(ret => {
+      console.log(ret, 'lottery');
+      let str = ret.opencode;
+      let arr = str.split('+');
+      let redBall = arr[0].split(',');
+      let blueBall = arr[1];
+      this.setState({
+        redBall: redBall,
+        blueBall: blueBall,
+      })
+    }).catch(err => {
+      console.info(err, '错误');
+    });
   }
 
   render() {
-    var numbers = this.state.numbers;
-    var len = numbers.length;
-    var redNumber = numbers.slice(0, len-1);
-    var blueNumber = numbers.slice(len-1);
-
+    let redBall = this.state.redBall;
+    let blueBall = this.state.blueBall;
+    console.log(redBall, blueBall, 'redBall, blueBall');
     return(
       <View style={styles.ball}>
         {
-          redNumber.map((number, i) => (
+          redBall !== '' && redBall.map((number, i) => (
             <Image
               style={styles.ballImg}
               source={require('./img/redball.png')}
-              key={i}
+              key={'redBall' + i}
             >
-              <Text style={styles.ballText}> {number} </Text>
+              <Text style={styles.ballText} numberOfLines={1}> {number}</Text>
             </Image>
           ))
         }
-        <Image
-          style={styles.ballImg}
-          source={require('./img/blueball.png')}
-          key={len-1}
-        >
-          <Text style={styles.ballText}> {blueNumber} </Text>
-        </Image>
+        {
+          blueBall !== '' && <Image
+            style={styles.ballImg}
+            source={require('./img/blueball.png')}
+            key={'blueBall'}
+          >
+            <Text style={[styles.ballText, styles.ballText]} numberOfLines={1}> {blueBall}</Text>
+          </Image>
+        }
       </View>
     );
   }
@@ -280,7 +301,9 @@ const styles = StyleSheet.create({
   },
   ballText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 8,
+    lineHeight: 12,
+    textAlign: 'center'
   },
   ballImg: {
     width: 14,

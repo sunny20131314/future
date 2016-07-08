@@ -248,13 +248,13 @@ for(let m = 0, len = dataTabs.length; m !== len; m++ ){
 }
 
 // 存储数据!
-export default storage = new Storage({
+let storage1 = new Storage({
   // 最大容量，默认值1000条数据循环存储
   size: 1000,
 
   // 数据过期时间，默认一整天（1000 * 3600 * 24 毫秒），设为null则永不过期
   //defaultExpires: 1000 * 3600 * 24,
-  defaultExpires: 1000 * 2,
+  defaultExpires: 1000 * 3600 * 24,
 
   // 读写时在内存中缓存数据。默认启用。
   enableCache: true,
@@ -263,26 +263,28 @@ export default storage = new Storage({
     //http://f.apiplus.cn/ssq.json
     lottery(params){
       let { id, resolve, reject } = params;
+      console.log(params, 'params');
       fetch('http://f.apiplus.cn/ssq-1.json', {
         method: 'GET',
       }).then(response => {
-        console.log(response, 'response');
         return response.json();
       }).then(json => {
         console.log(json, 'json');
-        //if(json && json.user){
-        //  storage.save({
-        //    key: 'user',
-        //    id,
-        //    rawData: json.user
-        //  });
-        //  // 成功则调用resolve
-        //  resolve && resolve(json.user);
-        //}
-        //else{
-        //  // 失败则调用reject
-        //  reject && reject(new Error('data parse error'));
-        //}
+        if(json && json.data){
+          let data = json.data[0];
+          storage1.save({
+            key: 'lottery',
+            id,
+            rawData: data,
+            expires: 1000,
+          });
+          // 成功则调用resolve
+          resolve && resolve(data);
+        }
+        else{
+          // 失败则调用reject
+          reject && reject(new Error('data parse error'));
+        }
       }).catch(err => {
         console.warn(err);
         reject && reject(err);
@@ -293,21 +295,21 @@ export default storage = new Storage({
 
 
 // 所有tab页的数据
-storage.save({
+storage1.save({
   key: 'dataTabs',
   rawData: dataTabs,
   expires: 1000 * 3600 * 24 * 30  //30天
 });
 
-storage.save({
+storage1.save({
   key: 'dataTabOrders',
   rawData: dataTabOrders,
-  expires: 1000 * 2  // 2s
+  expires: 1000 * 30  // 30s
 });
 //module.exports = dataTabs;
 
 //// 设备数据
-//storage.save({
+//storage1.save({
 //  key: 'device',
 //  rawData: {
 //    isOs: isOs,
@@ -376,4 +378,5 @@ storage.save({
 //});
 
 // 全局中使用!!! 类似localstorage, 注意引用顺序
-global.storage = storage;
+console.log(global.storage ? 'global.storage' : 'storage1');
+export default storage = global.storage ? global.storage : storage1;

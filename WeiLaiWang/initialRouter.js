@@ -33,4 +33,3 @@ export default class RouteComponent extends Component {
   }
 }
 
-AppRegistry.registerComponent('WeiLaiWang', () => RouteComponent);

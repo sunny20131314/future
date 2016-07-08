@@ -2,8 +2,6 @@
  * Created by sunny on 16/6/28.
  *
  */
-
-
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -64,7 +62,6 @@ export default class MyComponent extends Component {
   }
 
   _returnMain() {
-    console.log(this.navigator, '_returnMain');
     // -- noRefresh 记录由编辑页返回到主页,是否需要刷新,跳转(在Indicator中记录相应的位置 contentOffset.y的位置)
     this.navigator && this.navigator.replace({
       name: 'Main',
@@ -76,21 +73,19 @@ export default class MyComponent extends Component {
   }
 
   _keepData() {
-    console.log(dataTabOrders, '_keepData');
     if(!dataTabOrders) {
       return false;
     }
      //更改当前页的数据
-    let index = this.props.index;
-    let activePage = this.props.activePage;
-    console.log(dataTabOrders[index][activePage].order === this.order);
-    let data = dataTabOrders.slice();
+    //let index = this.props.index;
+    //let activePage = this.props.activePage;
+    //let data = dataTabOrders.slice();
     //console.log( this.order, dataTabOrders, data, data=== dataTabOrders, 'this.order, dataTabOrders, data');
-    dataTabOrders && global.storage.save({
-      key: 'dataTabOrders',
-      rawData: data,
-      expires: 1000 * 2  // 2s
-    });
+    //dataTabOrders && global.storage.save({
+    //  key: 'dataTabOrders',
+    //  rawData: dataTabOrders,
+    //  expires: 1000 * 2  // 2s
+    //});
   }
 
   render() {
@@ -113,10 +108,9 @@ export default class MyComponent extends Component {
           <TouchableOpacity
             onPress={this._keepData.bind(this)}
           >
-            <Image
-              source={require('./img/logo.jpg')}
-              style={styles.returnImg}
-            />
+            <Text style={styles.text}>
+              保存
+            </Text>
           </TouchableOpacity>
         </View>
         <SortableListView
