@@ -232,8 +232,6 @@ tab1[0] = {
   }
 };
 
-
-
 // tab页数据的排列顺序
 for(let m = 0, len = dataTabs.length; m !== len; m++ ){
   let tab = dataTabs[m];

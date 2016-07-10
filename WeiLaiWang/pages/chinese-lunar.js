@@ -11,7 +11,7 @@
 	 农历每一年，对应公历的数据
 	 此数据来源于互联网，原作者不详细，在此感谢
 	 MAPPING[0][0]：每年闰月的月份，0表示不闰
-	 MAPPING[0][1, 13]：表示每月初一对应的阳历时间，前两个字符表示月，后两个字符表示月
+	 MAPPING[0][1, 13]：表示每月初一对应的阳历时间，前两个字符表示月，后两个字符表示日
 	 */
 	var MAPPING = [
 		[8, "0131", "0301", "0331", "0429", "0528", "0627", "0726", "0825", "0924", "1023", "1122", "1222", "1320"], 	//1900
@@ -221,6 +221,7 @@
 	/*
 	 * 分析日期表达式，并提取其中的单位和数值
 	 */
+
 	var _expression = function(expr) {
 		var list = expr.match(/[+-]?\d+((ms)|[yMdhmsw])/g);
 		var result = [];
@@ -352,7 +353,7 @@
 	 */
 	_chineseLunar.monthAdd = function(lunar, inc) {
 		//如果是Date，则转换为农历
-		if (lunar instanceof Date) lunar = _chineseLunar.solarToLunar(lunar);
+			if (lunar instanceof Date) lunar = _chineseLunar.solarToLunar(lunar);
 		if (inc == 0) return lunar;
 
 		var year = lunar.year, count;
@@ -583,14 +584,15 @@
 		return (leap ? "闰" : "") + monthName[month - 1] + "月";
 	};
 
-	//获取农历传统天的名称
-	_chineseLunar.dayName = function(lunar) {
-		switch (lunar) {
+	//获取农历传统天的名称,初一显示为具体几月
+	_chineseLunar.dayName = function(day, month, leap) {
+		switch (day) {
+			case 1: return _chineseLunar.monthName(month, true, leap);
 			case 10: return '初十';
 			case 20: return '二十';
 			case 30: return '三十';
-			default: return ("初十廿卅".split("")[Math.floor(lunar / 10)] +
-				"一二三四五六七八九十".split("")[(lunar - 1) % 10]) || lunar;
+			default: return ("初十廿卅".split("")[Math.floor(day / 10)] +
+				"一二三四五六七八九十".split("")[(day - 1) % 10]) || day;
 		}
 	};
 

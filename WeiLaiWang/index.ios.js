@@ -7,6 +7,8 @@ import {
   AppRegistry
 } from 'react-native';
 
-import InitialRouter from './initialRouter';
+//import InitialRouter from './initialRouter';
+import InitialRouter from './calendar';
+
 AppRegistry.registerComponent('WeiLaiWang', () => InitialRouter);
 

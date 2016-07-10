@@ -21,14 +21,16 @@ export default class RouteComponent extends Component {
         //        return Navigator.SceneConfigs.HorizontalSwipeJumpFromRight;
         //      }}
         renderScene={(route, navigator) => {
-                let Components = route.component;
-                return (
-                  <Components
-                    {...route.params}
-                    name={route.name}
-                    navigator={navigator}
-                    />)
-              }} />
+          let Components = route.component;
+          if ( Component ) {
+            return (
+            <Components
+              {...route.params}
+              name={route.name}
+              navigator={navigator}
+              />)
+          }
+        }} />
     );
   }
 }

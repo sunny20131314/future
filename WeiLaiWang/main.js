@@ -115,8 +115,10 @@ export default class Main extends Component {
         <Header/>
         <ScrollView
           ref={(scrollView) => { this._scrollView = scrollView; }}
-          style={[styles.scrollView, {    height: scrollHeight}]}
+          style={[styles.scrollView, { height: scrollHeight}]}
           alwaysBounceHorizontal={false}
+          keyboardShouldPersistTaps='on-drag'
+          keyboardDismissMode
           refreshControl={
             <RefreshControl
               refreshing={this.state.isRefreshing}
@@ -177,44 +179,6 @@ export default class Main extends Component {
           }
           {
             // 快递页面
-            //<View>
-            //  <TouchableHighlight
-            //    activeOpacity={.8}
-            //    onPress={() => console.log('press')}
-            //    underlayColor="rgba(255, 255, 255, 0.6)"
-            //    style={{
-            //     width: 86,
-            //     marginLeft: 16,
-            //     paddingLeft: 24,
-            //     paddingRight: 24,
-            //     paddingTop: 6,
-            //     paddingBottom: 6,
-            //     borderWidth: 1,
-            //     borderColor: '#ededed',
-            //     borderRadius: 4,
-            //    }}
-            //  >
-            //    <Text style={{fontSize: 18, color: '#ff5248',}}>
-            //      快递
-            //    </Text>
-            //  </TouchableHighlight>
-            //  <SearchComponent
-            //    placeholder="请输入快递单号..."
-            //    keyboardType='numeric'
-            //    onSearch={this._onSearchDelivery.bind(this)}
-            //  />
-            //  <View style={styles.deliveryBtns}>
-            //    {
-            //      DeliveryArr.map((arr) => <DeliveryBtn
-            //        id={arr.id}
-            //        val={arr.val}
-            //        key={arr.id}
-            //        activeBtn={this.state.activeBtn}
-            //        setType={this._setType.bind(this)}
-            //      />)
-            //    }
-            //  </View>
-            //</View>
           }
           <View style={styles.indicator}>
             <TouchableHighlight
