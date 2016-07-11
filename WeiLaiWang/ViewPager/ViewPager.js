@@ -1,4 +1,5 @@
 'use strict';
+alert(123);
 
 var React = require('react');
 var { PropTypes } = React;
@@ -18,8 +19,9 @@ var StaticRenderer = require('react-native/Libraries/Components/StaticRenderer')
 var TimerMixin = require('react-timer-mixin');
 
 var DefaultViewPageIndicator = require('./DefaultViewPageIndicator');
-var deviceWidth = Dimensions.get('window').width;
 var ViewPagerDataSource = require('./ViewPagerDataSource');
+
+var deviceWidth = Dimensions.get('window').width;
 
 var ViewPager = React.createClass({
   mixins: [TimerMixin],
@@ -110,6 +112,7 @@ var ViewPager = React.createClass({
       onPanResponderMove: (e, gestureState) => {
         var dx = gestureState.dx;
         var offsetX = -dx / this.state.viewWidth + this.childIndex;
+        console.log(this.state.viewWidth, this.childIndex, 'this.state.viewWidth, this.childIndex');
         this.state.scrollValue.setValue(offsetX);
       },
     });

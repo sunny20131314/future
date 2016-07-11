@@ -37,7 +37,7 @@ let HEIGHT = Dimensions.get('window').height;
 var baseHeight = Platform.OS === 'ios' ?  0 : 10;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
-let webViewH = WIDTH / 980 * 273;
+let webViewH = WIDTH / 980 * 290;
 let tabWidth ;
 function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
   tabWidth = (WIDTH-margin * (num - 1))/num;
@@ -100,7 +100,7 @@ export default class Main extends Component {
       //autoSync: true,
       //syncInBackground: true
     }).then(ret => {
-      console.log(ret,'dataTabOrders');
+      //console.log(ret,'dataTabOrders');
       this.setState({
         dataTabOrders: ret
       });
@@ -118,11 +118,11 @@ export default class Main extends Component {
   url = 'http://m.k618.cn/dhy_news/';  //新闻页面的地址
 
   render() {
-    console.log('render');
+    //console.log('render');
     let dataTabs = this.state.dataTabs;
     let dataTabOrders = this.state.dataTabOrders;
     let isGetData = dataTabs !== '' && dataTabOrders !== '';
-    console.log(dataTabs, dataTabOrders, 'dataTabs, dataTabOrders')
+    //console.log(dataTabs, dataTabOrders, 'dataTabs, dataTabOrders')
     return (
       <View style={styles.container}>
         <View style={styles.header}>

@@ -246,7 +246,7 @@ for(let m = 0, len = dataTabs.length; m !== len; m++ ){
 }
 
 // 存储数据!
-/*let storage1 = new Storage({
+let storage1 = new Storage({
   // 最大容量，默认值1000条数据循环存储
   size: 1000,
 
@@ -261,7 +261,6 @@ for(let m = 0, len = dataTabs.length; m !== len; m++ ){
     //http://f.apiplus.cn/ssq.json
     lottery(params){
       let { id, resolve, reject } = params;
-      console.log(params, 'params');
       fetch('http://f.apiplus.cn/ssq-1.json', {
         method: 'GET',
       }).then(response => {
@@ -289,10 +288,10 @@ for(let m = 0, len = dataTabs.length; m !== len; m++ ){
       });
     }
   }
-});*/
+});
 
 
-/*// 所有tab页的数据
+// 所有tab页的数据
 storage1.save({
   key: 'dataTabs',
   rawData: dataTabs,
@@ -303,7 +302,7 @@ storage1.save({
   key: 'dataTabOrders',
   rawData: dataTabOrders,
   expires: 1000 * 30  // 30s
-});*/
+});
 
 
 

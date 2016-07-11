@@ -17,7 +17,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-var ViewPager = require('react-native-viewpager');
+var ViewPager = require('./ViewPager/ViewPager');
 
 import dragBtn from './dragBtn';
 
@@ -141,7 +141,7 @@ export default class Tab extends Component {
   }
 
   _renderPage(datas, pageID) {
-    console.log('_renderPage');
+    //console.log('_renderPage');
     let dataAll = this.data[pageID]; //当前切换页 url ,href
     return (
       <View style={styles.page}>
@@ -166,7 +166,7 @@ export default class Tab extends Component {
     }
 
   _onChangePage(page) {
-    console.log(page, 'page _onChangePage');
+    //console.log(page, 'page _onChangePage');
     if(this.state.activePage === page){
       return false;
     }

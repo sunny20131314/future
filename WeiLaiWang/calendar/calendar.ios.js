@@ -1,6 +1,5 @@
 'use strict';
 
-alert(1);
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -121,13 +120,15 @@ export default class Calendar extends Component {
   }
 
   myScrollIos(event) {
-      let scrollX = event.nativeEvent.contentOffset.x;
-      if (scrollX > width) {
-          this.nextMonth()
-      } else if (scrollX < width) {
-          this.prev()
-      }
-      this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
+    console.log(event.nativeEvent.contentOffset.x);
+    let scrollX = event.nativeEvent.contentOffset.x;
+    scrollX > width ? this.nextMonth() : this.prev();
+    //if (scrollX > width) {
+    //    this.nextMonth()
+    //} else if (scrollX < width) {
+    //    this.prev()
+    //}
+    this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
   }
 
   backTodayTouch() {
@@ -218,13 +219,14 @@ export default class Calendar extends Component {
           horizontal={true}
           contentOffset={{x: width, y: 0}}
           bounces={false}
-          onMomentumScrollEnd={event=>this.myScrollIos(event)}
+          onMomentumScrollEnd={this.myScrollIos.bind(this)}
           ref="trueScroll"
           showsHorizontalScrollIndicator={false}
           pagingEnabled={true}
         >
           <View>
             <ScrollView>
+              <Text>1111</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month-1}
@@ -236,6 +238,7 @@ export default class Calendar extends Component {
           </View>
           <View>
             <ScrollView>
+              <Text>2222</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month}
@@ -247,6 +250,7 @@ export default class Calendar extends Component {
           </View>
           <View>
             <ScrollView>
+              <Text>3333</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month+1}
