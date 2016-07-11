@@ -1,5 +1,6 @@
 'use strict';
 
+alert(1);
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -7,6 +8,8 @@ import {
   View,
   ListView,
   Dimensions,
+  Platform,
+  Picker,
   ScrollView,
   StatusBar,
   StatusBarIOS,
@@ -14,15 +17,12 @@ import {
   PixelRatio,
   DatePickerIOS,
   TouchableHighlight,
-  Image
+  Image,
 } from 'react-native';
-
 import chineseLunar from "./chinese-lunar";
-import newAct from "./newAct";
-import actView from "./actView"
 let {height, width} = Dimensions.get('window');
 
-export default class Main extends Component {
+export default class Calendar extends Component {
   static propTypes = {
       date: React.PropTypes.instanceOf(Date)
   };
@@ -30,10 +30,7 @@ export default class Main extends Component {
   constructor(props) {
     super(props);
 
-    let dates = this.props.date;
-    let year = dates.getFullYear();
-    let month = dates.getMonth();
-    let date = dates.getDate();
+    let {year, month, date} = this.props.date;
     this.state = {
       year: year,
       month: month,
@@ -43,6 +40,7 @@ export default class Main extends Component {
       staticDate: date,
       nextMonthYear: year,
       nextMonth: month,
+      IosDataPick: false,
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
@@ -50,7 +48,6 @@ export default class Main extends Component {
   }
 
   componentDidMount() {
-    this.fetchData()
   }
 
   componentWillMount() {
@@ -61,11 +58,14 @@ export default class Main extends Component {
   }
 
   nextMonth() {
+    console.log('next');
+
     let monthDay = this.monthDay;
-    if (this.state.month == 11) {
-      if (this.state.date > this.monthDay[0]) {
+    let month = this.state.month;
+    if (month == 11) {
+      if (this.state.date > monthDay[0]) {
         this.setState({
-          date: this.monthDay[0]
+          date: monthDay[0]
         })
       }
       this.setState({
@@ -73,23 +73,25 @@ export default class Main extends Component {
         month: 0,
       })
     } else {
-      if (this.state.date > this.monthDay[this.state.month + 1]) {
+      if (this.state.date > monthDay[month + 1]) {
         this.setState({
-          date: this.monthDay[this.state.month + 1]
+          date: monthDay[month + 1]
         })
       }
       this.setState({
-        month: this.state.month + 1,
+        month: month + 1,
       })
     }
   }
 
   prev() {
+    console.log('prev');
     let monthDay = this.monthDay;
-    if (this.state.month == 0) {
-      if (this.state.date > this.monthDay[11]) {
+    let month = this.state.month;
+    if (month === 0) {
+      if (this.state.date > monthDay[11]) {
         this.setState({
-          date: this.monthDay[11]
+          date: monthDay[11]
         })
       }
       this.setState({
@@ -97,13 +99,13 @@ export default class Main extends Component {
         month: 11,
       })
     } else {
-      if (this.state.date > this.monthDay[this.state.month - 1]) {
+      if (this.state.date > monthDay[month - 1]) {
         this.setState({
-          date: this.monthDay[this.state.month - 1]
+          date: monthDay[month - 1]
         })
       }
       this.setState({
-        month: this.state.month - 1,
+        month: month - 1,
       })
     }
   }
@@ -112,21 +114,13 @@ export default class Main extends Component {
     return year % 100 === 0 ? year % 400 === 0 ? 1 : 0 : year % 4 === 0 ? 1 : 0;
   }
 
-  fetchData() {
-    let select = 'select * from data where year = ' + this.state.year + ' and month = '
-        + this.state.month + ' and date = ' + this.state.date;
-    let dateCheck = 'select date from data where year = ' + this.state.year + ' and month = '
-        + this.state.month;
-  }
-
   selectDay(d) {
     this.setState({
       date: d
     });
-    this.fetchData()
   }
 
-  myScroll(event) {
+  myScrollIos(event) {
       let scrollX = event.nativeEvent.contentOffset.x;
       if (scrollX > width) {
           this.nextMonth()
@@ -134,7 +128,6 @@ export default class Main extends Component {
           this.prev()
       }
       this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
-      this.fetchData()
   }
 
   backTodayTouch() {
@@ -153,12 +146,38 @@ export default class Main extends Component {
     });
   }
 
+  _returnMain() {
+    let {navigator} = this.props;
+    if (navigator.getCurrentRoutes().length > 1) {
+      navigator.pop();
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
+        <View style={[styles.navBarRow]}>
+          <TouchableOpacity
+            onPress={this._returnMain.bind(this)}
+            style={styles.navButton}>
+            <Text style={styles.text}>
+              {'<'}
+            </Text>
+          </TouchableOpacity>
+          <Text
+            style={[styles.title, {textAlign: 'center'}]}
+            numberOfLines={1}
+          >
+            日历
+          </Text>
+          <TouchableOpacity
+            onPress={this._returnMain.bind(this)}
+          >
+          </TouchableOpacity>
+        </View>
         <View style={styles.head}>
           <View style={styles.dayTitle}>
-            <TouchableOpacity onPress={(event)=>{console.log(event.nativeEvent.pageY)}}
+            <TouchableOpacity onPress={()=>{this.setState({IosDataPick: !this.state.IosDataPick})}}
                               style={styles.dayTimeTouch}
             >
               <Text style={styles.t1}>
@@ -167,14 +186,22 @@ export default class Main extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.backTodayTouch}>
-            <TouchableOpacity onPress={this.prev.bind(this)}>
-              <Text style={styles.backToday}>{'<'}</Text>
+            <TouchableOpacity
+              //style={[styles.navButton]}
+              onPress={this.prev.bind(this)}
+            >
+              <Text style={[styles.backToday, styles.text]}>{'<'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>this.backTodayTouch()}>
+            <TouchableOpacity
+              onPress={()=>this.backTodayTouch()}
+            >
               <Text style={styles.backToday}>今天</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={this.nextMonth.bind(this)}>
-              <Text style={styles.backToday}>{'>'}</Text>
+            <TouchableOpacity
+              //style={[styles.navButton]}
+              onPress={this.nextMonth.bind(this)}
+            >
+              <Text style={[styles.backToday, styles.text]}>{'>'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -191,7 +218,7 @@ export default class Main extends Component {
           horizontal={true}
           contentOffset={{x: width, y: 0}}
           bounces={false}
-          onMomentumScrollEnd={event=>this.myScroll(event)}
+          onMomentumScrollEnd={event=>this.myScrollIos(event)}
           ref="trueScroll"
           showsHorizontalScrollIndicator={false}
           pagingEnabled={true}
@@ -204,7 +231,6 @@ export default class Main extends Component {
                 date={this.state.date}
                 selectDay={this.selectDay.bind(this)}
                 isLeap={this.isLeap}
-                fetchData={this.fetchData.bind(this)}
               />
             </ScrollView>
           </View>
@@ -216,7 +242,6 @@ export default class Main extends Component {
                 date={this.state.date}
                 selectDay={this.selectDay.bind(this)}
                 isLeap={this.isLeap}
-                fetchData={this.fetchData.bind(this)}
               />
             </ScrollView>
           </View>
@@ -228,16 +253,18 @@ export default class Main extends Component {
                 date={this.state.date}
                 selectDay={this.selectDay.bind(this)}
                 isLeap={this.isLeap}
-                fetchData={this.fetchData.bind(this)}
               />
             </ScrollView>
           </View>
         </ScrollView>
-        <DatePickerIOS
-          date={ (new Date(this.state.year, this.state.month, this.state.date))}
-          mode="date"
-          onDateChange={this.onDateChange.bind(this)}
-        />
+        {
+          this.state.IosDataPick && <DatePickerIOS
+            style={styles.IosDataPick}
+            date={ (new Date(this.state.year, this.state.month, this.state.date))}
+            mode="date"
+            onDateChange={this.onDateChange.bind(this)}
+          />
+        }
     </View>
 
     )
@@ -291,16 +318,16 @@ class DateBoard extends Component {
     }
     // 添加每月的日期
     let date = this.props.date;
-    for (var i = 1, len = monthDay[myMonth]; i !== len; i++) {
-      let choosed = date === i;               //是否被点击选中了~~~
+    for (var i = 1, len = monthDay[myMonth]; i <= len; i++) {
+      let isChoose = date === i;               //是否被点击选中了~~~
       let nowDay = ( firstDay + i - 1 ) % 7;  //记录当前是周几, 0 / 6 -> 周末
       let isWeek = nowDay === 0 || nowDay === 6;
       let lunar = chineseLunar.solarToLunar(new Date(myYear, myMonth, i));
       arr.push(
         <TouchableOpacity onPress={this.props.selectDay.bind(this, i)} key={i} style={styles.dateBox}>
-          <View style={[styles.selected, choosed && styles.selectedBg]}>
-            <Text style={[styles.dateText, choosed && styles.selectedText]}>{i}</Text>
-            <Text style={[styles.lunarFont, isWeek && styles.weekend, choosed && styles.selectedText]}>
+          <View style={[styles.selected, isChoose && styles.selectedBg]}>
+            <Text style={[styles.dateText, isChoose && styles.selectedText]}>{i}</Text>
+            <Text style={[styles.lunarFont, isWeek && styles.weekend, isChoose && styles.selectedText]}>
               {chineseLunar.dayName(lunar.day, lunar.month, lunar.leap)}
             </Text>
           </View>
@@ -324,21 +351,61 @@ class DateBoard extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     backgroundColor: '#fff',
   },
-  head: {
-    paddingTop: 12,
-    height: 44,
+  navBarRow: {
+    height: 45,
+    padding: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: '#ff5248',
-    flexDirection: 'row'
+  },
+  text: {
+    color: 'white',
+  },
+  navButton: {
+    width: 20,
+    padding: 3,
+    marginRight: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'transparent',
+    borderRadius: 3,
+  },
+  title: {
+    color: 'white',
+    fontSize: 13,
+  },
+  returnImg: {
+    width: 40,
+    height: 20,
+  },
+  head: {
+    height: 40,
+    backgroundColor: '#ff5248',
+    flexDirection: 'row',
   },
   dayTitle: {
     flex: 1,
     height: 40,
-    alignItems: 'center'
+    width: 200,
+    flexDirection: 'row',
+    alignItems: 'center',
+    //justifyContent: 'center'
   },
   dayTimeTouch: {
     height: 40,
+    paddingLeft: 10,
+    justifyContent: 'center'
+  },
+  picker: {
+    height: 40,
+    padding: 0,
+    margin: 0,
+    color: '#fff',
     justifyContent: 'center'
   },
   t1: {
@@ -360,6 +427,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     paddingLeft: 8,
     paddingRight: 8,
+    textAlign: 'center',
   },
   dateTitle: {
     flexDirection: 'row',
@@ -373,7 +441,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 10,
   },
-
   dateBoard: {
     width: width,
     flexDirection: 'row',
@@ -385,6 +452,7 @@ const styles = StyleSheet.create({
   list: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    height: height,
   },
   dateBox: {
     justifyContent: 'center',
@@ -393,7 +461,7 @@ const styles = StyleSheet.create({
     height: width / 7 - 1,
   },
   dateText: {
-    fontSize: 14,
+    fontSize: 16,
   },
   lunarFont: {
     fontSize: 9,
@@ -416,49 +484,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold'
   },
-  addBtn: {
-    width: width,
-    height: 60,
-  },
-  bView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  btnText: {
-    marginLeft: 10,
-    fontSize: 16,
-    color: '#ea8010',
-    fontWeight: 'bold',
-  },
-  textBorder: {
-    height: 60,
-    width: width - 50,
-    justifyContent: 'center',
-    borderBottomWidth: .5,
-    borderColor: '#eee'
-  },
-  time: {
-    width: 38,
-    height: 38,
-    marginLeft: 5.5,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: '#ea8010',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  addImg: {
-    marginLeft: 3,
-    width: 42,
-    height: 42,
-  },
-  point: {
+  IosDataPick: {
     position: 'absolute',
-    left: 19,
-    top: 3,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#f00'
-  }
+    bottom: 0,
+  },
 });

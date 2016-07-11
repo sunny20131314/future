@@ -246,7 +246,7 @@ for(let m = 0, len = dataTabs.length; m !== len; m++ ){
 }
 
 // 存储数据!
-let storage1 = new Storage({
+/*let storage1 = new Storage({
   // 最大容量，默认值1000条数据循环存储
   size: 1000,
 
@@ -289,10 +289,10 @@ let storage1 = new Storage({
       });
     }
   }
-});
+});*/
 
 
-// 所有tab页的数据
+/*// 所有tab页的数据
 storage1.save({
   key: 'dataTabs',
   rawData: dataTabs,
@@ -303,7 +303,10 @@ storage1.save({
   key: 'dataTabOrders',
   rawData: dataTabOrders,
   expires: 1000 * 30  // 30s
-});
+});*/
+
+
+
 //module.exports = dataTabs;
 
 //// 设备数据

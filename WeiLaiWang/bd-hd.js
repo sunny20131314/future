@@ -65,10 +65,13 @@ class Ball extends Component {
     });
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.blueBall !== nextState.blueBall || this.state.redBall !== nextState.redBall;
+  }
+
   render() {
     let redBall = this.state.redBall;
     let blueBall = this.state.blueBall;
-    console.log(redBall, blueBall, 'redBall, blueBall');
     return(
       <View style={styles.ball}>
         {
@@ -105,6 +108,8 @@ export default class Mess extends Component {
   }
 
   render() {
+    let {month, weekday, date} = this.props.date;
+
     return (
       <View style={styles.hd}>
         <View style={styles.hdLeft}>
@@ -147,18 +152,18 @@ export default class Mess extends Component {
         <View style={styles.hdCenter}>
           <TouchableHighlight
             activeOpacity={.8}
-            onPress={() => console.log('press')}
+            onPress={() => this.props.onJumpCalendar()}
             underlayColor="rgba(255, 255, 255, 0.6)"
           >
             <View style={styles.flexColumn}>
               <View style={styles.hdTop}>
                 <Text style={styles.textLarge}>
-                  07月07日
+                  {( month + 1 ) + '月' + date + '日'}
                 </Text>
               </View>
               <View style={styles.hdMedium}>
                 <Text style={styles.textMedium}>
-                  星期四
+                  {weekday}
                 </Text>
               </View>
             </View>

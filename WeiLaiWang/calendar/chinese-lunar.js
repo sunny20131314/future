@@ -524,7 +524,7 @@
 	_chineseLunar.solarToLunar = function(solar, format) {
 		var offset = solar.getFullYear() - MINYEAR;
 		//超出范围
-		if(offset <= 0 || offset >= MAPPING.length){
+		if(offset < 0 || offset >= MAPPING.length){
 			throw new Error('Specified date range is invalid.');
 		};
 

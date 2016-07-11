@@ -14,16 +14,18 @@ import {
   WebView,
   Text,
   Image,
-  View
+  View,
+  Animated,
 } from 'react-native';
 
 import storage from './storage';
-import Header from './header';
+//import nav from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
 import Ad from './ad';
 import SearchComponent from './search';
 import Tab from './tab';
+import Calendar from './calendar/calendar';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 
@@ -48,8 +50,21 @@ export default class Main extends Component {
   constructor(props) {
     super(props);
 
+    let dates = new Date();
+    let weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    let year = dates.getFullYear();
+    let month = dates.getMonth();
+    let date = dates.getDate();
     this.state = {
-      isRefreshing: true,
+      date: {
+        year: year,
+        month: month,
+        date: date,
+        weekday: weekday[dates.getDay()]
+      },
+      fadeAnim: new Animated.Value(0),
+      isToTop: false,
+    isRefreshing: true,
       dataTabs: '',      //所有tab页数据
       dataTabOrders: '', //所有tab页数据的相关顺序
       lottery: '',
@@ -100,8 +115,6 @@ export default class Main extends Component {
     navigator: React.PropTypes.object.isRequired
   };
 
-  _scrollView = '';
-
   url = 'http://m.k618.cn/dhy_news/';  //新闻页面的地址
 
   render() {
@@ -112,13 +125,35 @@ export default class Main extends Component {
     console.log(dataTabs, dataTabOrders, 'dataTabs, dataTabOrders')
     return (
       <View style={styles.container}>
-        <Header/>
+        <View style={styles.header}>
+          <TouchableHighlight
+            activeOpacity={.8}
+            onPress={() => console.log('press')}
+            underlayColor="rgba(255, 255, 255, 0.5)"
+          >
+            <Image
+              source={require('./img/icon_user.png')}
+              style={styles.user}
+            />
+          </TouchableHighlight>
+          <Image
+            source={require('./img/logo.jpg')}
+            style={styles.logo}
+          >
+          </Image>
+          <Image
+            source={require('./img/icon_info.png')}
+            style={styles.info}
+          >
+          </Image>
+        </View>
         <ScrollView
           ref={(scrollView) => { this._scrollView = scrollView; }}
           style={[styles.scrollView, { height: scrollHeight}]}
           alwaysBounceHorizontal={false}
-          keyboardShouldPersistTaps='on-drag'
-          keyboardDismissMode
+          keyboardShouldPersistTaps={false}
+          keyboardDismissMode='on-drag'
+          scrollEventThrottle={200}
           refreshControl={
             <RefreshControl
               refreshing={this.state.isRefreshing}
@@ -128,8 +163,12 @@ export default class Main extends Component {
               titleColor="#8f8f8f"
             />
           }
+          onScroll={this._onScroll.bind(this)}
         >
-          <BdHd onJump={this._onJump.bind(this)} />
+          <BdHd onJump={this._onJump.bind(this)}
+                date={this.state.date}
+                onJumpCalendar={this.onJumpCalendar.bind(this)}
+          />
           <Ad style={{marginTop: 12,marginBottom: 12,}}/>
           <View style={styles.searchBaiDu}>
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
@@ -204,27 +243,43 @@ export default class Main extends Component {
           <Ad />
           <BdBtm />
         </ScrollView>
-        <TouchableOpacity
-          style={styles.goTop}
-          onPress={() => { this._scrollView.scrollTo({x: 0,y: 0, animated: true}); }}
-        >
-          <Image
-            source={require('./img/icon_top.png')}
-            style={styles.goTopImg}
+        {
+          // 向上滚动~~~
+          this.state.isToTop && <TouchableOpacity
+            style={[styles.goTop, {opacity: this.state.fadeAnim,}]}
+            onPress={() => {
+              this._scrollView.scrollTo({x: 0,y: 0, animated: true});
+              this.setState({
+                isToTop: false
+              });
+            }}
           >
-          </Image>
-        </TouchableOpacity>
+            <Image
+              source={require('./img/icon_top.png')}
+              style={styles.goTopImg}
+            >
+            </Image>
+          </TouchableOpacity>
+        }
       </View>
     );
   }
 
   componentDidMount() {
-    // 加载数据-刷新
+    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
     setTimeout(() => {
       this.setState({
         isRefreshing: false
       });
     }, 1800);
+
+    this.state.isToTop && Animated.timing(       // Uses easing functions
+      this.state.fadeAnim, // The value to drive
+      {
+        toValue: 1,        // Target
+        duration: 400,    // Configuration
+      }
+    ).start();
   }
 
   _setType(id) {
@@ -233,10 +288,36 @@ export default class Main extends Component {
     });
   }
 
+  _onScroll(e) {
+    // 页面偏卡,
+    clearTimeout(this.scrollId);
+    let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
+    this.scrollId = setTimeout( () => {
+      this.setState({
+        isToTop: offsetY > 300,
+      });
+    }, 300);
+
+  }
+
+  onJumpCalendar() {
+    console.log('calendar');
+    let navigator = this.navigator;
+    if(navigator) {
+      navigator.push({
+        name: 'Calendar',
+        component: Calendar,
+        params: {
+          date: this.state.date,
+        }
+      })
+    }
+  }
   _onJump(url) {// 跳转到url
     // 新开一个 webview...
-    if(this.navigator) {
-      this.navigator.push({
+    let navigator = this.navigator;
+    if(navigator) {
+      navigator.push({
         name: 'webView',
         component: WebViewCom,
         params: {
@@ -287,6 +368,28 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#fff'
   },
+  header: {
+    //flex: 1,
+    height: 45,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ff5248'
+  },
+  user: {
+    width: 24,
+    height: 24,
+    marginLeft: 10
+  },
+  logo: {
+    width: 75,
+    height: 34
+  },
+  info: {
+    width: 24,
+    height: 24,
+    marginRight: 10
+  },
   scrollView: {
     flex:1,
     backgroundColor: '#fff',
@@ -316,11 +419,11 @@ const styles = StyleSheet.create({
   },
   goTop: {
     position: 'absolute',
-    top: 10,
-    right: 60,
+    bottom: 40,
+    right: 40,
   },
   goTopImg: {
-    width: 24,
-    height: 24,
+    width: 48,
+    height: 48,
   },
 });
