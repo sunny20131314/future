@@ -1,5 +1,6 @@
 /**
  * Created by sunzhimin on 16/6/20.
+ * 在合适返回主页???
  */
 
 'use strict';
@@ -103,16 +104,12 @@ export default class WebViewCom extends Component {
   goBack() {
     let len = this.navigator.getCurrentRoutes().length;
     console.log(len, 'length');
-    // HACK 新闻那块 webview, push了两次, 会一直都是3??? why?
-    //len = this.props.WebViewNews ? len - 1 : len;
-    //if ( len > 2 ){
-      this.refs['webview'].goBack();
-    //  return true;
+    this.refs['webview'].goBack();
+    //if ( len > 1 ) {
+    //  let WebViewNews = this.props.WebViewNews;
+    //  WebViewNews && WebViewNews.goBack();    // 回到初始页面
+    //  this.navigator.pop();
     //}
-    //if (len === 2){
-    //  this.returnMain();
-    //}
-    //return false;
   }
 
   onShouldStartLoadWithRequest(event) {

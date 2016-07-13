@@ -17,7 +17,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-var ViewPager = require('react-native-viewpager');
+var ViewPager = require('./ViewPager/ViewPager');
 
 import dragBtn from './dragBtn';
 
@@ -25,56 +25,37 @@ export default class Tab extends Component {
   constructor(props) {
     super(props);
 
-    this.index = this.props.index; // number: 记录是第几个tab
+    let index = this.index = this.props.index; // number: 记录是第几个tab
+    let appDataOrders = this.appDataOrders = this.props.appDataOrders;
     this.imgLayout = this.props.deviceLayout.imgLayout;
-    this.data = [];
-    this.title = [];
-    this.order = [];
-    this.show = [];
-    this.alter = [];
-    let order = this.props.order;  // arr: 记录显示顺序及tab [ order: Array[], show :Array[8], alter: Array[]], [show :Array[8]]
-    let datas = this.props.data;  // arr: 所有数据 []
-    this.len = order.length;
-    for (let i = 0, len = this.len; i !== len; i++ ){
-      this.data[i] = datas[i].data;
-      this.title[i] = datas[i].name;
-      this.order[i] = order[i].order;
-      this.show[i] = order[i].order.slice(0, 8);
-      this.alter[i] = order[i].alter;
-    }
+    let {data, title} = this.props.data;
+    this.data = data;  // arr: 当前tab页的所有数据 []
+    this.title = title; // 类目
+    this.len = title.length;
+    this.order = appDataOrders[index];
+
     var dataSource = new ViewPager.DataSource({
       pageHasChanged: (p1, p2) => p1 !== p2
     });
 
     this.state = {
-      activePage: 0,   // 这个需要传递给编辑,告诉是第几个
-      dataSource: dataSource.cloneWithPages(this.show),
+      activePage: 0,   // 这个需要传递给编辑, 当前tab页的第几个
+      dataSource: dataSource.cloneWithPages(this.order),
     }
   }
 
   static propTypes = {
     index: React.PropTypes.number.isRequired,
-    data: React.PropTypes.array.isRequired,
-    order: React.PropTypes.array.isRequired
+    data: React.PropTypes.object.isRequired,
   };
   //
   //shouldComponentUpdate(nextProps, nextState) {
   //  return nextState.activePage !== this.state.activePage;
   //}
 
-  render() {
-    this.onJump = this.props.onJump;
-    return (
-      <ViewPager
-        style={[this.props.style]}
-        dataSource={this.state.dataSource}
-        renderPage={this._renderPage.bind(this)}
-        renderPageIndicator={this._renderPageIndicator.bind(this)}
-        onChangePage={this._onChangePage.bind(this)}
-        isLoop={this.len > 1}
-        autoPlay={false}/>
-    );
+  componentDidMount() {
   }
+
   _renderIndicator(i, goToPage, name) {
     let isChange = this.state.activePage === i;
     return (
@@ -124,10 +105,8 @@ export default class Tab extends Component {
                 url: '',
                 deviceLayout: this.props.deviceLayout,
                 index: this.index,  //第几个tab
-                activePage: this.state.activePage,
-                order: this.order[activePage],    //显示的全部数据顺序
-                show: this.show[activePage],    //显示的前8条数据顺序
-                alter: this.alter[activePage],    //显示的剩余数据顺序
+                activePage: activePage,   //page页
+                appDataOrders: this.appDataOrders,    //显示的全部数据顺序
                 data: this.data[activePage],    //该页面的全部数据
               }
             });
@@ -141,38 +120,53 @@ export default class Tab extends Component {
   }
 
   _renderPage(datas, pageID) {
-    console.log('_renderPage');
-    let dataAll = this.data[pageID]; //当前切换页 url ,href
+    let pageData = this.data[pageID];
+    datas = datas.slice(0, 8);
     return (
       <View style={styles.page}>
-        {datas.map((data, i) => (
+        {datas.map((data, i) => {
+          return (
           <TouchableHighlight
             key={'img' + i}
             onPress={() => {
-              this.onJump(dataAll[data].href);
+              this.props.onJump(pageData[data].href);
             }}
             underlayColor="transparent"
           >
             <Image
-              source={dataAll[data].url}
+              source={pageData[data].url}
               style={this.imgLayout}
               resizeMode='contain'
-            />
+            >
+              <Text>{data.url}</Text>
+            </Image>
           </TouchableHighlight>
           //<TouchImage key={'img' + i} url={dataAll[data].url} href={dataAll[data].href}/>
-        ))}
+        )})}
       </View>
       );
     }
 
   _onChangePage(page) {
-    console.log(page, 'page _onChangePage');
     if(this.state.activePage === page){
       return false;
     }
     this.setState({
       activePage: page
     });
+  }
+
+  render() {
+    return (
+      <ViewPager
+        style={[this.props.style]}
+        dataSource={this.state.dataSource}
+        renderPage={this._renderPage.bind(this)}
+        renderPageIndicator={this._renderPageIndicator.bind(this)}
+        onChangePage={this._onChangePage.bind(this)}
+        isLoop={this.len > 1}
+        autoPlay={false}/>
+    );
   }
 }
 

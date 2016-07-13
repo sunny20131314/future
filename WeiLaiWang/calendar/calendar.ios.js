@@ -1,6 +1,5 @@
 'use strict';
 
-alert(1);
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -24,7 +23,7 @@ let {height, width} = Dimensions.get('window');
 
 export default class Calendar extends Component {
   static propTypes = {
-      date: React.PropTypes.instanceOf(Date)
+    date: React.PropTypes.object.isRequired
   };
 
   constructor(props) {

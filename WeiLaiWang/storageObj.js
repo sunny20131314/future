@@ -272,37 +272,9 @@ let storage1 = new Storage({
           let data = json.data[0];
           storage1.save({
             key: 'lottery',
+            id,
             rawData: data,
             expires: 1000,
-          });
-          // 成功则调用resolve
-          resolve && resolve(data);
-        }
-        else{
-          // 失败则调用reject
-          reject && reject(new Error('data parse error'));
-        }
-      }).catch(err => {
-        console.warn(err);
-        reject && reject(err);
-      });
-    },
-    weather(params){
-      let { id, resolve, reject } = params;
-      fetch('http://apis.baidu.com/heweather/weather/free?city=' + '北京', {
-        method: 'POST',
-        headers:{
-          apikey:'7472b1cdcf63836e3986c69f03860508'
-        }
-      }).then(response => {
-        return response.json();
-      }).then(json => {
-        console.log(json, 'json');
-        let data = json['HeWeather data service 3.0'][0];
-        if(json && data){
-          storage1.save({
-            key: 'weather',
-            rawData: data,
           });
           // 成功则调用resolve
           resolve && resolve(data);

@@ -7,9 +7,14 @@ import {
   StyleSheet,
   ListView,
   PanResponder,
+  Platform,
   Dimensions,
   Animated,
   TouchableHighlight,
+  BackAndroid,
+  ToastAndroid,
+  AlertIOS,
+  AsyncStorage,
   TouchableOpacity,
   Image,
   Text,
@@ -17,22 +22,8 @@ import {
 } from 'react-native';
 import Main from './main';
 
+let isIos = Platform.OS === 'ios';
 let SortableListView = require('./SortableListView');
-
-let dataTabOrders;
-
-// 获取全部数据的顺序
-global.storage.load({
-  key: 'dataTabOrders',
-  autoSync: true,
-  syncInBackground: false
-}).then(ret => {
-  dataTabOrders = ret;
-  console.log(dataTabOrders);
-}).catch(err => {
-  console.info(err, '错误');
-});
-
 
 class RowComponent extends Component {
   render() {
@@ -54,11 +45,12 @@ class RowComponent extends Component {
 export default class MyComponent extends Component {
   constructor(props) {
     super(props);
-    let {order, data, navigator} = this.props;
+    let {appDataOrders, data, navigator, index, activePage} = this.props;
     this.imgLayout = this.props.deviceLayout.imgLayout;
     this.data = data;
-    this.order = order;
+    this.order = appDataOrders[index][activePage];
     this.navigator = navigator;
+    this.appDataOrders = appDataOrders;
   }
 
   _returnMain() {
@@ -72,20 +64,24 @@ export default class MyComponent extends Component {
     });
   }
 
-  _keepData() {
-    if(!dataTabOrders) {
-      return false;
+  componentDidMount() {
+    BackAndroid.addEventListener('hardwareBackPress', function() {
+      return this._returnMain();
+    });
+  }
+
+  async _keepData() {
+    try {
+      let data = JSON.stringify(this.appDataOrders);
+      await AsyncStorage.setItem('appDataOrders', data);
+    } catch (error) {
+      !isIos ? ToastAndroid.show('保存数据失败,请稍后再试!', ToastAndroid.SHORT)
+              : AlertIOS.alert(
+                  '提示: ',
+                  '保存数据失败,请稍后再试!'
+                );
     }
-     //更改当前页的数据
-    //let index = this.props.index;
-    //let activePage = this.props.activePage;
-    //let data = dataTabOrders.slice();
-    //console.log( this.order, dataTabOrders, data, data=== dataTabOrders, 'this.order, dataTabOrders, data');
-    //dataTabOrders && global.storage.save({
-    //  key: 'dataTabOrders',
-    //  rawData: dataTabOrders,
-    //  expires: 1000 * 2  // 2s
-    //});
+    this._returnMain();
   }
 
   render() {

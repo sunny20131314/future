@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  AsyncStorage,
   TouchableOpacity,
   TouchableHighlight,
   WebView,
@@ -18,18 +19,18 @@ import {
   Animated,
 } from 'react-native';
 
-import storage from './storage';
-//import nav from './header';
 import WebViewCom from './webView';
 import BdHd from './bd-hd';
+import Calendar from './calendar/calendar';
+import WeatherPage from './weatherPage';
 import Ad from './ad';
 import SearchComponent from './search';
 import Tab from './tab';
-import Calendar from './calendar/calendar';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
+let appData = require('./appData');
 
-global.storage = storage;
+//import ViewPager from './viewpager';
 
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
@@ -51,22 +52,20 @@ export default class Main extends Component {
     super(props);
 
     let dates = new Date();
-    let weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
     let year = dates.getFullYear();
     let month = dates.getMonth();
     let date = dates.getDate();
     this.state = {
-      date: {
+      date: {  // bdhd,  calendar
         year: year,
         month: month,
         date: date,
-        weekday: weekday[dates.getDay()]
+        day: dates.getDay()
       },
       fadeAnim: new Animated.Value(0),
       isToTop: false,
-    isRefreshing: true,
-      dataTabs: '',      //所有tab页数据
-      dataTabOrders: '', //所有tab页数据的相关顺序
+      isRefreshing: true,
+      appDataOrders: '',      //所有tab页数据
       lottery: '',
     };
 
@@ -81,33 +80,6 @@ export default class Main extends Component {
       HEIGHT: HEIGHT,
     };
 
-    // 获得tab页的数据
-    storage.load({
-      key: 'dataTabs',
-      autoSync: true,
-      syncInBackground: true
-    }).then(ret => {
-      this.setState({
-        dataTabs: ret
-      });
-    }).catch(err => {
-      console.info(err, '拿不到相关数据');
-    });
-
-    // 获得tab页的相关顺序
-    storage.load({
-      key: 'dataTabOrders',
-      //autoSync: true,
-      //syncInBackground: true
-    }).then(ret => {
-      console.log(ret,'dataTabOrders');
-      this.setState({
-        dataTabOrders: ret
-      });
-    }).catch(err => {
-      console.info(err, '错误');
-    });
-
     this.navigator = this.props.navigator;
   }
 
@@ -117,12 +89,159 @@ export default class Main extends Component {
 
   url = 'http://m.k618.cn/dhy_news/';  //新闻页面的地址
 
+  async _loadInitialState() {
+    try {
+      var value = await AsyncStorage.getItem('appDataOrders');
+      value = JSON.parse(value);
+      console.log(value, 'value');
+      if (value !== null){
+        this.setState({appDataOrders: value});
+      } else {
+        // tab页数据的排列顺序
+        let appDataOrders = [];
+        for(let m = 0, len = appData.length; m !== len; m++ ){
+          let tab = appData[m].data;   // 每个tab页的数据
+          let tabIndex = appDataOrders[m] = []; // 传递每一个tab的数据
+          console.log(tab, 'tab');
+          let indexLen = tab.length;
+          for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
+            tabIndex[n] = Object.keys(tab[n]);   // 保存全部数据的顺序
+          }
+        }
+        this.setState({appDataOrders: appDataOrders});
+        await AsyncStorage.setItem('appData', JSON.stringify(appDataOrders));
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+// 获得tab页的数据
+  componentWillMount() {
+    this._loadInitialState();
+  }
+
+  componentDidMount() {
+    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
+    setTimeout(() => {
+      this.setState({
+        isRefreshing: false
+      });
+    }, 1800);
+  }
+
+  componentDidUpdate() {
+    this.state.isToTop && Animated.timing(       // Uses easing functions
+      this.state.fadeAnim, // The value to drive
+      {
+        toValue: 1,        // Target
+        duration: 400,    // Configuration
+      }
+    ).start();
+  }
+
+  _setType(id) {
+    this.setState({
+      activeBtn: id
+    });
+  }
+
+  _onScroll(e) {
+    // 页面偏卡,
+    //clearTimeout(this.scrollId);
+    //let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
+    //this.scrollId = setTimeout( () => {
+    //  this.setState({
+    //    isToTop: offsetY > 300,
+    //  });
+    //}, 300);
+
+    let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
+    this.setState({
+      isToTop: offsetY > 300,
+    });
+
+  }
+
+  _onJumpCalendar() {
+    console.log('calendar');
+    let navigator = this.navigator;
+    if(navigator) {
+      navigator.push({
+        name: 'Calendar',
+        component: Calendar,
+        params: {
+          date: this.state.date,
+        }
+      })
+    }
+  }
+
+  _onJumpWeatherPage(data) {
+    console.log('calendar');
+    let navigator = this.navigator;
+    if(navigator) {
+      navigator.push({
+        name: 'WeatherPage',
+        component: WeatherPage,
+        params: {
+          data,
+          scrollHeight,
+        }
+      })
+    }
+  }
+
+  _onJump(url) {// 跳转到url
+    // 新开一个 webview...
+    let navigator = this.navigator;
+    if(navigator) {
+      navigator.push({
+        name: 'webView',
+        component: WebViewCom,
+        params: {
+          url: url,
+        }
+      })
+    }
+  }
+
+  _onSearchBaiDu(val) {
+    this._onJump( 'http://www.baidu.com/s?wd=' + val );
+  }
+
+  _onSearchDelivery(val) {
+    // 检测数据类型为 number --
+    this._onJump( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
+  }
+
+  _onRefresh() {
+    this.setState({isRefreshing: true});
+
+    // 加载相关数据 : 天气,广告, 新闻!
+    setTimeout(() => {
+      this.setState({
+        isRefreshing: false
+      });
+    }, 2000);
+  }
+
+  _onNavigationStateChange(nav) {
+    let url = nav.url;
+    if(nav.navigationType && url !== this.url && this.navigator) {
+      this.navigator.push({
+        name: 'webView',
+        component: WebViewCom,
+        params: {
+          url: url,
+          WebViewNews: this.WebViewNews
+        }
+      })
+    }
+  }
+
   render() {
-    console.log('render');
-    let dataTabs = this.state.dataTabs;
-    let dataTabOrders = this.state.dataTabOrders;
-    let isGetData = dataTabs !== '' && dataTabOrders !== '';
-    console.log(dataTabs, dataTabOrders, 'dataTabs, dataTabOrders')
+    //console.log('render');
+    let appDataOrders = this.state.appDataOrders;
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -163,11 +282,14 @@ export default class Main extends Component {
               titleColor="#8f8f8f"
             />
           }
-          onScroll={this._onScroll.bind(this)}
+          onMomentumScrollEnd={this._onScroll.bind(this)}
         >
           <BdHd onJump={this._onJump.bind(this)}
                 date={this.state.date}
-                onJumpCalendar={this.onJumpCalendar.bind(this)}
+                onJumpCalendar={this._onJumpCalendar.bind(this)}
+                onJumpWeatherPage={this._onJumpWeatherPage.bind(this)}
+                height={HEIGHT}
+                width={WIDTH}
           />
           <Ad style={{marginTop: 12,marginBottom: 12,}}/>
           <View style={styles.searchBaiDu}>
@@ -176,12 +298,13 @@ export default class Main extends Component {
           <View style={styles.tabCon}>
             { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
               // 保存在state, 加载好了之后, state数据 -- 渲染
-              isGetData && <Tab
+
+              appDataOrders !== '' && <Tab
                   style={styles.viewpager}
                   navigator={this.navigator}
                   onJump={this._onJump.bind(this)}
-                  data={dataTabs[0]}
-                  order={dataTabOrders[0]}
+                  data={appData[0]}
+                  appDataOrders={appDataOrders}
                   index={0}
                   key={'tab' + 0}
                   deviceLayout={this.deviceLayout}
@@ -190,7 +313,7 @@ export default class Main extends Component {
           </View>
 
           {  // 轮播图
-            isGetData && dataTabs.map((dataTab, i) => {
+            appDataOrders !== '' && appDataOrders.map((dataTab, i) => {
               if( !i ) {
                 return <WebView
                   key={'webView' + i}
@@ -208,8 +331,8 @@ export default class Main extends Component {
                   style={styles.viewpager}
                   navigator={this.navigator}
                   onJump={this._onJump.bind(this)}
-                  data={dataTab}
-                  order={dataTabOrders[i]}
+                  data={appData[i]}
+                  appDataOrders={appDataOrders}
                   index={i}
                   key={'tab' + i}
                   deviceLayout={this.deviceLayout}
@@ -263,102 +386,6 @@ export default class Main extends Component {
         }
       </View>
     );
-  }
-
-  componentDidMount() {
-    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
-    setTimeout(() => {
-      this.setState({
-        isRefreshing: false
-      });
-    }, 1800);
-
-    this.state.isToTop && Animated.timing(       // Uses easing functions
-      this.state.fadeAnim, // The value to drive
-      {
-        toValue: 1,        // Target
-        duration: 400,    // Configuration
-      }
-    ).start();
-  }
-
-  _setType(id) {
-    this.setState({
-      activeBtn: id
-    });
-  }
-
-  _onScroll(e) {
-    // 页面偏卡,
-    clearTimeout(this.scrollId);
-    let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
-    this.scrollId = setTimeout( () => {
-      this.setState({
-        isToTop: offsetY > 300,
-      });
-    }, 300);
-
-  }
-
-  onJumpCalendar() {
-    console.log('calendar');
-    let navigator = this.navigator;
-    if(navigator) {
-      navigator.push({
-        name: 'Calendar',
-        component: Calendar,
-        params: {
-          date: this.state.date,
-        }
-      })
-    }
-  }
-  _onJump(url) {// 跳转到url
-    // 新开一个 webview...
-    let navigator = this.navigator;
-    if(navigator) {
-      navigator.push({
-        name: 'webView',
-        component: WebViewCom,
-        params: {
-          url: url,
-        }
-      })
-    }
-  }
-
-  _onSearchBaiDu(val) {
-    this._onJump( 'http://www.baidu.com/s?wd=' + val );
-  }
-
-  _onSearchDelivery(val) {
-    // 检测数据类型为 number --
-    this._onJump( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
-  }
-
-  _onRefresh() {
-    this.setState({isRefreshing: true});
-
-    // 加载相关数据 : 天气,广告, 新闻!
-    setTimeout(() => {
-      this.setState({
-        isRefreshing: false
-      });
-    }, 2000);
-  }
-
-  _onNavigationStateChange(nav) {
-    let url = nav.url;
-    if(nav.navigationType && url !== this.url && this.navigator) {
-      this.navigator.push({
-        name: 'webView',
-        component: WebViewCom,
-        params: {
-          url: url,
-          WebViewNews: this.WebViewNews
-        }
-      })
-    }
   }
 }
 
