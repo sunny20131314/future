@@ -1,5 +1,4 @@
 'use strict';
-alert(123);
 
 var React = require('react');
 var { PropTypes } = React;
@@ -171,30 +170,34 @@ var ViewPager = React.createClass({
     }
   },
 
-  goToPage(pageNumber, animate = true) {
-
-    var pageCount = this.props.dataSource.getPageCount();
+  goToPage(pageNumber, animate = true) {  // 这个是给指示点击跳转
+    var pageCount = this.props.dataSource.getPageCount();  // 总页数
     if (pageNumber < 0 || pageNumber >= pageCount) {
       console.error('Invalid page number: ', pageNumber);
-      return
+      return;
     }
-
     var step = pageNumber - this.state.currentPage;
+    console.log(pageNumber, this.state.currentPage, step, 'pageNumber, currentPage, step');
     this.movePage(step, null, animate);
   },
 
   movePage(step, gs, animate = true) {
     var pageCount = this.props.dataSource.getPageCount();
     var pageNumber = this.state.currentPage + step;
+    console.log(step, pageCount, pageNumber, 'step, pageCount, pageNumber');
     if (this.props.isLoop) {
-      pageNumber = (pageNumber + pageCount) % pageCount;
+      pageNumber = (pageNumber + pageCount) % pageCount; // 为了保证是大于0的整数,所以 + 1
+      console.log(pageNumber, 'isLoop, pageNumber');
     } else {
       pageNumber = Math.min(Math.max(0, pageNumber), pageCount - 1);
+      console.log(pageNumber, 'noLoop, pageNumber');
     }
 
     const moved = pageNumber !== this.state.currentPage;
     const scrollStep = (moved ? step : 0) + this.childIndex;
     const nextChildIdx = (pageNumber > 0 || this.props.isLoop) ? 1 : 0;
+
+    console.log(pageNumber, scrollStep, this.childIndex, 'noLoop, pageNumber');
 
     const postChange = () => {
       this.fling = false;
