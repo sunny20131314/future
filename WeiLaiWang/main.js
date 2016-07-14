@@ -10,6 +10,8 @@ import {
   ScrollView,
   RefreshControl,
   AsyncStorage,
+  BackAndroid,
+  ToastAndroid,
   TouchableOpacity,
   TouchableHighlight,
   WebView,
@@ -35,7 +37,8 @@ let appData = require('./appData');
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
-var baseHeight = Platform.OS === 'ios' ?  0 : 10;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
+let isIos = Platform.OS === 'ios';
+var baseHeight = isIos ?  0 : 10;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
 let webViewH = WIDTH / 980 * 290;
@@ -47,6 +50,7 @@ imgLayout();
 let tabHeight = tabWidth / 490 * 245;
 let tabHeights = ( tabHeight + 4 ) * 4 +48;
 
+let keyboardDismissMode = isIos ? 'interactive' : 'none';
 export default class Main extends Component {
   constructor(props) {
     super(props);
@@ -115,9 +119,25 @@ export default class Main extends Component {
       console.warn(error);
     }
   }
+
 // 获得tab页的数据
   componentWillMount() {
     this._loadInitialState();
+
+    if ( isIos ) return;
+
+    // 天气, 编辑, 日历, webview!
+    //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+    //  alert('BackAndroid');
+    //  // 第一次给出提示,第二次退出
+    //  if( this.backId ) return false;
+    //  this.backId = setTimeout( () => {
+    //    ToastAndroid.show('再按一次, 退出程序', ToastAndroid.SHORT);
+    //  }, 1);
+    //  setTimeout( () => {
+    //    clearTimeout(this.backId);
+    //  }, 300);
+    //});
   }
 
   componentDidMount() {
@@ -126,7 +146,7 @@ export default class Main extends Component {
       this.setState({
         isRefreshing: false
       });
-    }, 1800);
+    }, 800);
   }
 
   componentDidUpdate() {
@@ -154,6 +174,10 @@ export default class Main extends Component {
     //    isToTop: offsetY > 300,
     //  });
     //}, 300);
+
+    //this.
+    this.scrollLayout = e.nativeEvent.contentSize.height - scrollHeight;
+    console.log(e.nativeEvent, this.scrollLayout, scrollHeight, 'onscroll, scrollLayout, scrollHeight');
 
     let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
     this.setState({
@@ -198,20 +222,13 @@ export default class Main extends Component {
       navigator.push({
         name: 'webView',
         component: WebViewCom,
-        params: {
-          url: url,
-        }
+        params: { url }
       })
     }
   }
 
   _onSearchBaiDu(val) {
     this._onJump( 'http://www.baidu.com/s?wd=' + val );
-  }
-
-  _onSearchDelivery(val) {
-    // 检测数据类型为 number --
-    this._onJump( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
   }
 
   _onRefresh() {
@@ -222,26 +239,29 @@ export default class Main extends Component {
       this.setState({
         isRefreshing: false
       });
-    }, 2000);
+    }, 800);
   }
 
   _onNavigationStateChange(nav) {
     let url = nav.url;
-    if(nav.navigationType && url !== this.url && this.navigator) {
-      this.navigator.push({
-        name: 'webView',
-        component: WebViewCom,
-        params: {
-          url: url,
-          WebViewNews: this.WebViewNews
-        }
-      })
+
+    // ios: nav.navigationType = other/ click
+    // android: nav.loading = true (2)
+    let len = this.navigator.getCurrentRoutes().length;
+    if( url === this.url || !this.navigator || len > 1) {
+      return false;
+    }
+
+    if ( isIos && nav.navigationType || !isIos && !nav.canGoBack && nav.loading ) {
+      console.info('jump');
+      this._onJump( url );
+      this.WebViewNews.goBack();
     }
   }
 
   render() {
-    //console.log('render');
     let appDataOrders = this.state.appDataOrders;
+    console.log(appDataOrders);
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -271,7 +291,7 @@ export default class Main extends Component {
           style={[styles.scrollView, { height: scrollHeight}]}
           alwaysBounceHorizontal={false}
           keyboardShouldPersistTaps={false}
-          keyboardDismissMode='on-drag'
+          keyboardDismissMode={keyboardDismissMode}
           scrollEventThrottle={200}
           refreshControl={
             <RefreshControl
@@ -316,9 +336,9 @@ export default class Main extends Component {
             appDataOrders !== '' && appDataOrders.map((dataTab, i) => {
               if( !i ) {
                 return <WebView
-                  key={'webView' + i}
+                  key={'webViewNews'}
                   ref={(webView) => this.WebViewNews = webView}
-                  style={{flex:1, height: webViewH,}}
+                  style={{flex:1, width: WIDTH, height: webViewH,}}
                   onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                   bounces={false}
                   scrollEnabled={false}
@@ -362,7 +382,7 @@ export default class Main extends Component {
               </Text>
             </TouchableHighlight>
           </View>
-          <DeliveryBtnCon onSearch={this._onJump.bind(this)} />
+          <DeliveryBtnCon onSearch={this._onJump.bind(this)} scrollView={this._scrollView} scrollLayout={this.scrollLayout} />
           <Ad />
           <BdBtm />
         </ScrollView>

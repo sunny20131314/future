@@ -24,7 +24,7 @@ let isIos = Platform.OS === 'ios';
 
 export default class Main extends Component {
   static propTypes = {
-    date: React.PropTypes.array.isRequired
+    date: React.PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -53,14 +53,9 @@ export default class Main extends Component {
   componentWillMount() {
     this.monthDay = [31, 28 + this.isLeap(this.state.year), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    let {navigator} = this.props;
     this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      if (navigator.getCurrentRoutes().length > 1) {
-        navigator.pop();
-        return true;
-      } else {
-        return false;
-      }
+      this._returnMain();
+      return true;
     })
   }
 

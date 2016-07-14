@@ -10,9 +10,11 @@ import {
   ListView,
   Image,
   Text,
-  View
+  View,
+  BackAndroid,
+  Platform
 } from 'react-native';
-let {height, width} = Dimensions.get('window');
+let isIos = Platform.OS === 'ios';
 
 export default class WeatherPage extends Component {
   constructor(props) {
@@ -27,6 +29,12 @@ export default class WeatherPage extends Component {
   }
 
   componentWillMount() {
+
+    if ( !isIos ) return;
+    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+      this._returnMain();
+      return true;
+    })
   }
 
   _returnMain() {

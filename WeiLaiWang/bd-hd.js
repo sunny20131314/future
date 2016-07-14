@@ -630,7 +630,7 @@ export default class Mess extends Component {
                       <View style={styles.cityPick}>
                         <Image
                           style={styles.cityPic}
-                          source={require('./img/location.png')}
+                          source={require('./img/location1.png')}
                         >
                         </Image>
                         <Text>
@@ -783,8 +783,7 @@ const styles = StyleSheet.create({
     //borderStyle: 'dotted',
   },
   hdBottomItem: {
-    paddingLeft: 10,
-    paddingRight: 10,
+    padding: 10,
   },
   weatherPic: {
     width: 32,
@@ -804,8 +803,9 @@ const styles = StyleSheet.create({
     flex:1,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingLeft: 6,
-    paddingRight: 6,
+    padding: 6,
+    //paddingLeft: 6,
+    //paddingRight: 6,
   },
   ballText: {
     color: '#fff',
@@ -839,5 +839,6 @@ const styles = StyleSheet.create({
   cityPic: {
     width: 12,
     height: 14,
+    marginRight: 2,
   }
 });

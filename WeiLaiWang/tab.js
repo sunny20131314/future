@@ -113,7 +113,13 @@ export default class Tab extends Component {
           }}
           underlayColor="transparent"
         >
-          <Text style={styles.editText}>编辑</Text>
+          <Image
+            style={styles.editPic}
+            source={require('./img/edit.png')}
+          >
+            {            //<Text style={styles.editText}>编辑</Text>
+            }
+          </Image>
         </TouchableHighlight>
       </View>
     )
@@ -215,6 +221,10 @@ var styles = StyleSheet.create({
     paddingLeft: 16,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  editPic: {
+    width: 18,
+    height: 18,
   },
   editText: {
     fontSize: 12,

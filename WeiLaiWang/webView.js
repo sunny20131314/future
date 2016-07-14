@@ -16,9 +16,11 @@ import ReactNative, {
   Image,
   Alert,
   TouchableOpacity,
+  Platform,
   StyleSheet,
 } from 'react-native';
 let WIDTH = Dimensions.get('window').width;
+let isIos = Platform.OS === 'ios';
 
 //  嵌套网站, 有返回前进, 搜索!
 export default class WebViewCom extends Component {
@@ -29,17 +31,66 @@ export default class WebViewCom extends Component {
 
     this.state = {
       url: this.props.url,
-      title: 'No Page Loaded',
+      title: '加载中,请稍后...',
       backButtonEnabled: false,
       loading: true,
       titleNow: '',
     }
   }
 
-
   static propTypes = {
     navigator: React.PropTypes.object.isRequired
   };
+
+  componentWillMount() {
+    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+      this.goBack();
+      return true;
+    })
+  }
+
+  onError() {
+    Alert.alert(
+      '提示: ',
+      '请检查你输入的内容是否正确!'
+    );
+  }
+
+  returnMain() {
+    this.navigator.pop();  // 回到最顶层的路由
+  }
+
+  goBack() {
+    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.returnMain();
+  }
+
+  onShouldStartLoadWithRequest(event) {
+    this.setState({
+      titleOri: event.title
+    });
+    return true;
+  }
+
+  onNavigationStateChange(nav) {
+    console.log(nav,this.state.url);
+
+    // TODO 为了解决 webview 中地址搜索的两个链接的不停跳转(重定向)
+    // ios: 每次跳转页面的时候,会触发两次: 第一次: navigationType: click, other(push);
+    // 第二次: 拿到页面的相关数据  米有 navigationType
+
+    // android: loading触发三次: 2次loading, 1次loading: false
+    if( ( isIos && nav.navigationType ) || ( !isIos && nav.loading )) {
+      return false;
+    }
+
+    this.setState({
+      loading: nav.loading,
+      title: nav.title,
+      backButtonEnabled: nav.canGoBack,
+      url: nav.url,
+    });
+
+  }
 
   render() {
     return (
@@ -82,56 +133,6 @@ export default class WebViewCom extends Component {
     );
   }
 
-  componentDidMount() {
-    BackAndroid.addEventListener('hardwareBackPress', function() {
-      return this.goBack();
-    });
-  }
-
-  onError() {
-    Alert.alert(
-      '提示: ',
-      '请检查你输入的内容是否正确!'
-    );
-  }
-
-  returnMain() {
-    let WebViewNews = this.props.WebViewNews;
-    WebViewNews && WebViewNews.goBack();    // 回到初始页面
-    this.navigator.popToTop();  // 回到最顶层的路由
-  }
-
-  goBack() {
-    let len = this.navigator.getCurrentRoutes().length;
-    console.log(len, 'length');
-    this.refs['webview'].goBack();
-    //if ( len > 1 ) {
-    //  let WebViewNews = this.props.WebViewNews;
-    //  WebViewNews && WebViewNews.goBack();    // 回到初始页面
-    //  this.navigator.pop();
-    //}
-  }
-
-  onShouldStartLoadWithRequest(event) {
-    this.setState({
-      titleOri: event.title
-    });
-    return true;
-  }
-
-  onNavigationStateChange(navState) {
-    console.log(navState,this.state.url);
-
-    // TODO 为了解决 webview 中地址搜索的两个链接的不停跳转(重定向)
-    // 每次跳转页面的时候,会触发两次: 第一次: navigationType: click, other(push);
-    // 第二次: 拿到页面的相关数据  米有 navigationType
-    !navState.navigationType && this.setState({
-      loading: navState.loading,
-      title: navState.title,
-      backButtonEnabled: navState.canGoBack,
-      url: navState.url,
-    });
-  }
 }
 
 var styles = StyleSheet.create({

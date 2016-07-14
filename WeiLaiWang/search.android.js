@@ -34,6 +34,8 @@ export default class SearchComponent extends Component {
           onBlur={this.props.onBlur && this.props.onBlur}
           onChangeText={(text) => this.setState({text})}
           onSubmitEditing={this._submit.bind(this)}
+          multiline={false}
+          selectTextOnFocus={true}
         />
         <TouchableHighlight
           activeOpacity={.8}
@@ -65,20 +67,32 @@ export default class SearchComponent extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
-    marginBottom: 8,
+    height: 54,
+    paddingTop: 8,
+    paddingBottom: 8,
     marginLeft: 15,
     marginRight: 15,
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: '#fff'
   },
+  //searchInputContainer: {
+  //  flex: 1,
+  //  flexDirection: 'row',
+  //  paddingLeft: 10,
+  //  borderWidth: 1,
+  //  borderColor: '#afafaf',
+  //  borderRadius: 6,
+  //},
   searchInput: {
     flex: 1,
-    padding: 0,
+    height: 36,
+    lineHeight: 36,
+    paddingTop: 0,
     paddingLeft: 10,
-    borderWidth: 1,
-    borderColor: '#afafaf',
-    borderRadius: 6,
+    //borderWidth: 0,
+    //backgroundColor: '#afafaf',
   },
   searchBtn: {
     width: 65,

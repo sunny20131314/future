@@ -64,10 +64,15 @@ export default class MyComponent extends Component {
     });
   }
 
+  componentWillMount() {
+    if ( !isIos ) return;
+    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+      this._returnMain();
+      return true;
+    })
+  }
+
   componentDidMount() {
-    BackAndroid.addEventListener('hardwareBackPress', function() {
-      return this._returnMain();
-    });
   }
 
   async _keepData() {

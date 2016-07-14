@@ -120,15 +120,13 @@ export default class Calendar extends Component {
   }
 
   myScrollIos(event) {
-    console.log(event.nativeEvent.contentOffset.x);
-    let scrollX = event.nativeEvent.contentOffset.x;
-    scrollX > width ? this.nextMonth() : this.prev();
-    //if (scrollX > width) {
-    //    this.nextMonth()
-    //} else if (scrollX < width) {
-    //    this.prev()
-    //}
-    this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
+      let scrollX = event.nativeEvent.contentOffset.x;
+      if (scrollX > width) {
+          this.nextMonth()
+      } else if (scrollX < width) {
+          this.prev()
+      }
+      this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
   }
 
   backTodayTouch() {
@@ -155,6 +153,7 @@ export default class Calendar extends Component {
   }
 
   render() {
+    let data = new Date(this.state.year, this.state.month, this.state.date);
     return (
       <View style={styles.container}>
         <View style={[styles.navBarRow]}>
@@ -219,14 +218,13 @@ export default class Calendar extends Component {
           horizontal={true}
           contentOffset={{x: width, y: 0}}
           bounces={false}
-          onMomentumScrollEnd={this.myScrollIos.bind(this)}
+          onMomentumScrollEnd={event=>this.myScrollIos(event)}
           ref="trueScroll"
           showsHorizontalScrollIndicator={false}
           pagingEnabled={true}
         >
           <View>
             <ScrollView>
-              <Text>1111</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month-1}
@@ -238,7 +236,6 @@ export default class Calendar extends Component {
           </View>
           <View>
             <ScrollView>
-              <Text>2222</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month}
@@ -250,7 +247,6 @@ export default class Calendar extends Component {
           </View>
           <View>
             <ScrollView>
-              <Text>3333</Text>
               <DateBoard
                 year={this.state.year}
                 month={this.state.month+1}
@@ -264,7 +260,7 @@ export default class Calendar extends Component {
         {
           this.state.IosDataPick && <DatePickerIOS
             style={styles.IosDataPick}
-            date={ (new Date(this.state.year, this.state.month, this.state.date))}
+            date={data}
             mode="date"
             onDateChange={this.onDateChange.bind(this)}
           />

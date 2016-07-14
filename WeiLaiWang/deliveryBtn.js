@@ -21,23 +21,20 @@ class DeliveryBtn extends Component {
 
     this.state = {
       activeBtn: this.props.activeBtn,
-      preActiveBtn: this.props.activeBtn,
     }
   }
 
   render() {
+    let isActive = this.props.activeBtn === this.props.id;
     return (
       <View style={styles.btnItem}>
         <TouchableHighlight
           activeOpacity={.8}
           onPress={this._onClick.bind(this)}
           underlayColor="rgba(255, 255, 255, 0.6)"
-          style={styles.btn}
+          style={[styles.btn, isActive && {backgroundColor: '#ff5248'}]}
         >
-          <Text style={this.props.activeBtn=== this.props.id
-                    ? [styles.inactiveBtn, styles.activeBtn]
-                    : styles.inactiveBtn }
-          >
+          <Text style={[styles.text, isActive && {color: '#fff'}]}>
             {this.props.val}
           </Text>
         </TouchableHighlight>
@@ -73,15 +70,56 @@ export default class DeliveryBtnCon extends Component {
 
     this.state = {
       activeBtn: 'yuantong',
-      preActiveBtn: 'yuantong',
+      marginBottom: 0,
     }
+  }
+
+  _onSearchDelivery(val) {
+    // 检测数据类型为 number --
+    this.props.onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
+  }
+
+  _setType(id) {
+    this.setState({
+      activeBtn: id
+    });
+  }
+
+  _onBlur() {
+    console.log(this.props.scrollLayout);
+    this.setState({
+      marginBottom: 0,
+    });
+    setTimeout( () => {
+      this.props.scrollView.scrollTo({x: 0,y: this.props.scrollLayout, animated: true})
+    }, 300)
+  }
+
+  _onFocus() {
+    console.log(this.scrollLayout, 'onFocus');
+    this.setState({
+      marginBottom: 180,
+    });
+
+    setTimeout( () => {
+      this.props.scrollView.scrollTo({x: 0,y: this.scrollLayout, animated: true})
+    }, 300)
   }
 
   render() {
     return (
-      <View>
-        <SearchComponent placeholder="请输入快递单号..." keyboardType='numeric' onSearch={this._onSearchDelivery.bind(this)}/>
-        <View style={styles.deliveryBtns}>
+      <View onLayout={(e) => {
+        console.log(e.nativeEvent.layout.y, 'view');
+        this.scrollLayout = e.nativeEvent.layout.y;
+      }}>
+        <SearchComponent
+          placeholder="请输入快递单号..."
+          keyboardType='numeric'
+          onFocus={this._onFocus.bind(this, this.scrollLayout)}
+          onBlur={this._onBlur.bind(this)}
+          onSearch={this._onSearchDelivery.bind(this)}
+        />
+        <View style={[styles.deliveryBtns, { marginBottom: this.state.marginBottom }]}>
           {
             DeliveryArr.map((arr) => <DeliveryBtn
               id={arr.id}
@@ -95,44 +133,29 @@ export default class DeliveryBtnCon extends Component {
       </View>
     );
   }
-
-  _onSearchDelivery(val) {
-    // 检测数据类型为 number --
-    this.props.onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
-  }
-
-  _setType(id) {
-    this.setState({
-      activeBtn: id
-    });
-  }
 }
 
 const styles = StyleSheet.create({
   deliveryBtns: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    marginTop: 15,
-    marginBottom: 15,
+    margin: 15,
   },
-  btnItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  activeBtn: {
-    backgroundColor: '#ff5248',
-    color: '#fff',
-  },
-  inactiveBtn: {
+  btn: {
     width: 80,
-    fontSize: 16,
+    height: 32,
     paddingTop: 8,
     paddingBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
     backgroundColor: '#fff',
+    alignItems: 'center',
     borderRadius: 2,
+  },
+  text: {
+    fontSize: 16,
     textAlign: 'center',
   },
 });

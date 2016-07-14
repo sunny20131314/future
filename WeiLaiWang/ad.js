@@ -29,7 +29,7 @@ export default class Ad extends Component {
           underlayColor="rgba(255, 255, 255, 0.5)"
         >
           <Image
-            source={require('./img/ad.gif')}
+            source={require('./img/ad.jpg')}
             style={styles.ad}
             resizeMode='contain'
           />
