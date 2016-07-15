@@ -223,24 +223,27 @@ export default class Main extends Component {
               <Item label='12' value='12' />
             </Picker>
             <Text style={styles.t1}>月</Text>
-            <Picker
-              selectedValue={ '' + this.state.date }
-              style={[styles.picker, {width: 56}]}
-              enabled={true}
-              mode='dropdown'
-              prompt="请选择日期:"
-              onValueChange={(date) => {
-                console.log(date);
-                this.setState({date: Number(date) })
-              }}
-            >
-              {
-                itemDate.map((n) => {
-                  return <Item label={n} value={n} key={'pickDate' + n} />
-                })
-              }
-            </Picker>
-            <Text style={styles.t1}>日</Text>
+            <Text style={styles.t1}>{this.state.date + '日'}</Text>
+            {
+              /*<Picker
+               selectedValue={ '' + this.state.date }
+               style={[styles.picker, {width: 56}]}
+               enabled={true}
+               mode='dropdown'
+               prompt="请选择日期:"
+               onValueChange={(date) => {
+               console.log(date);
+               this.setState({date: Number(date) })
+               }}
+               >
+               {
+               itemDate.map((n) => {
+               return <Item label={n} value={n} key={'pickDate' + n} />
+               })
+               }
+               </Picker>
+               <Text style={styles.t1}>日</Text>*/
+            }
           </View>
           <View style={styles.backTodayTouch}>
             <TouchableOpacity

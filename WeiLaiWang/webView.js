@@ -52,7 +52,7 @@ export default class WebViewCom extends Component {
   onError() {
     Alert.alert(
       '提示: ',
-      '请检查你输入的内容是否正确!'
+      '加载页面出错,请稍后再试!'
     );
   }
 

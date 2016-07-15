@@ -12,7 +12,7 @@ var {
   PanResponder,
   Animated,
   StyleSheet,
-} = ReactNative;
+  } = ReactNative;
 
 var StaticRenderer = require('react-native/Libraries/Components/StaticRenderer');
 var TimerMixin = require('react-timer-mixin');
@@ -75,8 +75,8 @@ var ViewPager = React.createClass({
 
     var release = (e, gestureState) => {
       var relativeGestureDistance = gestureState.dx / deviceWidth,
-          //lastPageIndex = this.props.children.length - 1,
-          vx = gestureState.vx;
+      //lastPageIndex = this.props.children.length - 1,
+        vx = gestureState.vx;
 
       var step = 0;
       if (relativeGestureDistance < -0.5 || (relativeGestureDistance < 0 && vx <= -1e-6)) {
@@ -95,8 +95,8 @@ var ViewPager = React.createClass({
       onMoveShouldSetPanResponder: (e, gestureState) => {
         if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
           if (/* (gestureState.moveX <= this.props.edgeHitWidth ||
-              gestureState.moveX >= deviceWidth - this.props.edgeHitWidth) && */
-                this.props.locked !== true && !this.fling) {
+             gestureState.moveX >= deviceWidth - this.props.edgeHitWidth) && */
+          this.props.locked !== true && !this.fling) {
             this.props.hasTouch && this.props.hasTouch(true);
             return true;
           }
@@ -242,73 +242,73 @@ var ViewPager = React.createClass({
   },
 
   _getPage(pageIdx: number, loop = false: boolean) {
-    var dataSource = this.props.dataSource;
-    var pageID = dataSource.pageIdentities[pageIdx];
-    return (
-      <StaticRenderer
-        key={'p_' + pageID + (loop ? '_1' : '')}
-        shouldUpdate={true}
-        render={this.props.renderPage.bind(
+  var dataSource = this.props.dataSource;
+  var pageID = dataSource.pageIdentities[pageIdx];
+  return (
+    <StaticRenderer
+      key={'p_' + pageID + (loop ? '_1' : '')}
+      shouldUpdate={true}
+      render={this.props.renderPage.bind(
           null,
           dataSource.getPageData(pageIdx),
           pageID,
           this.state.currentPage
         )}
-      />
-    );
-  },
+    />
+  );
+},
 
-  render() {
-    var dataSource = this.props.dataSource;
-    var pageIDs = dataSource.pageIdentities;
+render() {
+  var dataSource = this.props.dataSource;
+  var pageIDs = dataSource.pageIdentities;
 
-    var bodyComponents = [];
+  var bodyComponents = [];
 
-    var pagesNum = 0;
-    var hasLeft = false;
-    var viewWidth = this.state.viewWidth;
+  var pagesNum = 0;
+  var hasLeft = false;
+  var viewWidth = this.state.viewWidth;
 
-    if(pageIDs.length > 0 && viewWidth > 0) {
-      // left page
-      if (this.state.currentPage > 0) {
-        bodyComponents.push(this._getPage(this.state.currentPage - 1));
-        pagesNum++;
-        hasLeft = true;
-      } else if (this.state.currentPage == 0 && this.props.isLoop) {
-        bodyComponents.push(this._getPage(pageIDs.length - 1, true));
-        pagesNum++;
-        hasLeft = true;
-      }
-
-      // center page
-      bodyComponents.push(this._getPage(this.state.currentPage));
+  if(pageIDs.length > 0 && viewWidth > 0) {
+    // left page
+    if (this.state.currentPage > 0) {
+      bodyComponents.push(this._getPage(this.state.currentPage - 1));
       pagesNum++;
-
-      // right page
-      if (this.state.currentPage < pageIDs.length - 1) {
-        bodyComponents.push(this._getPage(this.state.currentPage + 1));
-        pagesNum++;
-      } else if (this.state.currentPage == pageIDs.length - 1 && this.props.isLoop) {
-        bodyComponents.push(this._getPage(0, true));
-        pagesNum++;
-      }
+      hasLeft = true;
+    } else if (this.state.currentPage == 0 && this.props.isLoop) {
+      bodyComponents.push(this._getPage(pageIDs.length - 1, true));
+      pagesNum++;
+      hasLeft = true;
     }
 
-    var sceneContainerStyle = {
-      width: viewWidth * pagesNum,
-      flex: 1,
-      flexDirection: 'row'
-    };
+    // center page
+    bodyComponents.push(this._getPage(this.state.currentPage));
+    pagesNum++;
 
-    // this.childIndex = hasLeft ? 1 : 0;
-    // this.state.scrollValue.setValue(this.childIndex);
-    var translateX = this.state.scrollValue.interpolate({
-      inputRange: [0, 1], outputRange: [0, -viewWidth]
-    });
+    // right page
+    if (this.state.currentPage < pageIDs.length - 1) {
+      bodyComponents.push(this._getPage(this.state.currentPage + 1));
+      pagesNum++;
+    } else if (this.state.currentPage == pageIDs.length - 1 && this.props.isLoop) {
+      bodyComponents.push(this._getPage(0, true));
+      pagesNum++;
+    }
+  }
 
-    return (
-      <View style={{flex: 1}}
-        onLayout={(event) => {
+  var sceneContainerStyle = {
+    width: viewWidth * pagesNum,
+    flex: 1,
+    flexDirection: 'row'
+  };
+
+  // this.childIndex = hasLeft ? 1 : 0;
+  // this.state.scrollValue.setValue(this.childIndex);
+  var translateX = this.state.scrollValue.interpolate({
+    inputRange: [0, 1], outputRange: [0, -viewWidth]
+  });
+
+  return (
+    <View style={{flex: 1}}
+          onLayout={(event) => {
             // console.log('ViewPager.onLayout()');
             var viewWidth = event.nativeEvent.layout.width;
             if (!viewWidth || this.state.viewWidth === viewWidth) {
@@ -319,22 +319,22 @@ var ViewPager = React.createClass({
               viewWidth: viewWidth,
             });
           }}
-        >
-        {this.renderPageIndicator({goToPage: this.goToPage,
-          pageCount: pageIDs.length,
-          activePage: this.state.currentPage,
-          scrollValue: this.state.scrollValue,
-          scrollOffset: this.childIndex,
-        })}
+    >
+      {this.renderPageIndicator({goToPage: this.goToPage,
+        pageCount: pageIDs.length,
+        activePage: this.state.currentPage,
+        scrollValue: this.state.scrollValue,
+        scrollOffset: this.childIndex,
+      })}
 
-        <Animated.View style={[sceneContainerStyle, {transform: [{translateX}]}]}
-          {...this._panResponder.panHandlers}>
-          {bodyComponents}
-        </Animated.View>
+      <Animated.View style={[sceneContainerStyle, {transform: [{translateX}]}]}
+        {...this._panResponder.panHandlers}>
+        {bodyComponents}
+      </Animated.View>
 
-      </View>
-    );
-  }
+    </View>
+  );
+}
 });
 
 var styles = StyleSheet.create({

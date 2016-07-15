@@ -1,10 +1,12 @@
 /**
  * Created by sunzhimin on 16/6/20.
  * 存储当前的元素, 放在全局(相对于当前页面)
+ * 测试自带的软键盘压缩是否有用
  */
 
 import React, { Component } from 'react';
 import {
+  BackAndroid,
   StyleSheet,
   Alert,
   TouchableHighlight,
@@ -74,6 +76,16 @@ export default class DeliveryBtnCon extends Component {
     }
   }
 
+  componentWillMount() {
+    if ( global.isIos ) return;
+
+    // 天气, 编辑, 日历, webview!
+    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+      this.onBlur();
+      return true;
+    });
+  }
+
   _onSearchDelivery(val) {
     // 检测数据类型为 number --
     this.props.onSearch( 'http://m.kuaidi100.com/index_all.html?type=' + this.state.activeBtn + '&postid='+ val );
@@ -115,8 +127,8 @@ export default class DeliveryBtnCon extends Component {
         <SearchComponent
           placeholder="请输入快递单号..."
           keyboardType='numeric'
-          onFocus={this._onFocus.bind(this, this.scrollLayout)}
-          onBlur={this._onBlur.bind(this)}
+          //onFocus={this._onFocus.bind(this, this.scrollLayout)}
+          //onBlur={this._onBlur.bind(this)}
           onSearch={this._onSearchDelivery.bind(this)}
         />
         <View style={[styles.deliveryBtns, { marginBottom: this.state.marginBottom }]}>

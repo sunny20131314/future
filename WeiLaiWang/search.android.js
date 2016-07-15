@@ -5,7 +5,7 @@
 import React, { Component } from 'react';
 import {
   StyleSheet,
-  Alert,
+  ToastAndroid,
   TouchableHighlight,
   TextInput,
   Text,
@@ -30,8 +30,8 @@ export default class SearchComponent extends Component {
           placeholder={this.props.placeholder}
           value={this.state.text}
           keyboardType={this.props.keyboardType}
-          onFocus={this.props.onFocus && this.props.onFocus}
-          onBlur={this.props.onBlur && this.props.onBlur}
+          //onFocus={this.props.onFocus && this.props.onFocus}
+          //onBlur={this.props.onBlur && this.props.onBlur}
           onChangeText={(text) => this.setState({text})}
           onSubmitEditing={this._submit.bind(this)}
           multiline={false}
@@ -54,13 +54,11 @@ export default class SearchComponent extends Component {
   }
 
   _submit() {
-    console.log(this.state.text);
+    alert(this.state.text, 'submit');
+    //this.props.onBlur && this.props.onBlur();
     this.state.text
       ? this.props.onSearch( this.state.text)
-      : Alert.alert(
-          '提示: ',
-          '请输入相关内容!'
-        );
+      : ToastAndroid.show('请输入相关内容!', ToastAndroid.SHORT);
   }
 }
 

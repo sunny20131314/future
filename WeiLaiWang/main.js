@@ -1,6 +1,7 @@
 /**
  * Created by sunzhimin on 16/6/16.
  * tab页全部数据: tab页数据(地址,链接), tab页数据的相关顺序(展示)
+ * 关闭退出程序(系统会弹出 停止运行!!!)
  */
 import React, { Component } from 'react';
 import {
@@ -38,9 +39,10 @@ let appData = require('./appData');
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
 let isIos = Platform.OS === 'ios';
-var baseHeight = isIos ?  0 : 10;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
+var baseHeight = isIos ?  0 : 16;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
+global.isIos = isIos;
 let webViewH = WIDTH / 980 * 290;
 let tabWidth ;
 function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
@@ -50,7 +52,7 @@ imgLayout();
 let tabHeight = tabWidth / 490 * 245;
 let tabHeights = ( tabHeight + 4 ) * 4 +48;
 
-let keyboardDismissMode = isIos ? 'interactive' : 'none';
+let keyboardDismissMode = isIos ? 'interactive' : 'on-drag';
 export default class Main extends Component {
   constructor(props) {
     super(props);
@@ -124,13 +126,12 @@ export default class Main extends Component {
   componentWillMount() {
     this._loadInitialState();
 
-    if ( isIos ) return;
+    //if ( isIos ) return;
 
     // 天气, 编辑, 日历, webview!
     //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-    //  alert('BackAndroid');
     //  // 第一次给出提示,第二次退出
-    //  if( this.backId ) return false;
+    //  if( this.backId ) return true;
     //  this.backId = setTimeout( () => {
     //    ToastAndroid.show('再按一次, 退出程序', ToastAndroid.SHORT);
     //  }, 1);
@@ -181,8 +182,13 @@ export default class Main extends Component {
 
     let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
     this.setState({
-      isToTop: offsetY > 300,
+      isToTop: offsetY > 200,
     });
+
+  }
+
+  _renderError() {
+    // -- 当前webview, 和组件添加加载出错提示语.
 
   }
 
@@ -246,7 +252,7 @@ export default class Main extends Component {
     let url = nav.url;
 
     // ios: nav.navigationType = other/ click
-    // android: nav.loading = true (2)
+    // android: nav.loading = true (2) false
     let len = this.navigator.getCurrentRoutes().length;
     if( url === this.url || !this.navigator || len > 1) {
       return false;
@@ -338,9 +344,11 @@ export default class Main extends Component {
                 return <WebView
                   key={'webViewNews'}
                   ref={(webView) => this.WebViewNews = webView}
-                  style={{flex:1, width: WIDTH, height: webViewH,}}
+                  style={{flex:1, width: WIDTH, height: webViewH, }}
                   onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                   bounces={false}
+                  renderLoading={}
+                  renderError={this._renderError.bind(this)}
                   scrollEnabled={false}
                   source={{uri: this.url}}
                   scalesPageToFit={true}
@@ -382,7 +390,11 @@ export default class Main extends Component {
               </Text>
             </TouchableHighlight>
           </View>
-          <DeliveryBtnCon onSearch={this._onJump.bind(this)} scrollView={this._scrollView} scrollLayout={this.scrollLayout} />
+          <DeliveryBtnCon
+            onSearch={this._onJump.bind(this)}
+            scrollView={this._scrollView}
+            scrollLayout={this.scrollLayout}
+          />
           <Ad />
           <BdBtm />
         </ScrollView>

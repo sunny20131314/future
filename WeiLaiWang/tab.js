@@ -132,26 +132,26 @@ export default class Tab extends Component {
       <View style={styles.page}>
         {datas.map((data, i) => {
           return (
-          <TouchableHighlight
-            key={'img' + i}
-            onPress={() => {
+            <TouchableHighlight
+              key={'img' + i}
+              onPress={() => {
               this.props.onJump(pageData[data].href);
             }}
-            underlayColor="transparent"
-          >
-            <Image
-              source={pageData[data].url}
-              style={this.imgLayout}
-              resizeMode='contain'
+              underlayColor="transparent"
             >
-              <Text>{data.url}</Text>
-            </Image>
-          </TouchableHighlight>
-          //<TouchImage key={'img' + i} url={dataAll[data].url} href={dataAll[data].href}/>
-        )})}
+              <Image
+                source={pageData[data].url}
+                style={this.imgLayout}
+                resizeMode='contain'
+              >
+                <Text>{data.url}</Text>
+              </Image>
+            </TouchableHighlight>
+            //<TouchImage key={'img' + i} url={dataAll[data].url} href={dataAll[data].href}/>
+          )})}
       </View>
-      );
-    }
+    );
+  }
 
   _onChangePage(page) {
     if(this.state.activePage === page){
@@ -249,4 +249,3 @@ var styles = StyleSheet.create({
     textAlign: 'center'
   },
 });
-

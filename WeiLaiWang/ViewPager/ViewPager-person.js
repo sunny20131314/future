@@ -18,8 +18,9 @@ var StaticRenderer = require('react-native/Libraries/Components/StaticRenderer')
 var TimerMixin = require('react-timer-mixin');
 
 var DefaultViewPageIndicator = require('./DefaultViewPageIndicator');
-var deviceWidth = Dimensions.get('window').width;
 var ViewPagerDataSource = require('./ViewPagerDataSource');
+
+var deviceWidth = Dimensions.get('window').width;
 
 var ViewPager = React.createClass({
   mixins: [TimerMixin],
@@ -110,6 +111,7 @@ var ViewPager = React.createClass({
       onPanResponderMove: (e, gestureState) => {
         var dx = gestureState.dx;
         var offsetX = -dx / this.state.viewWidth + this.childIndex;
+        console.log(this.state.viewWidth, this.childIndex, 'this.state.viewWidth, this.childIndex');
         this.state.scrollValue.setValue(offsetX);
       },
     });
@@ -168,30 +170,34 @@ var ViewPager = React.createClass({
     }
   },
 
-  goToPage(pageNumber, animate = true) {
-
-    var pageCount = this.props.dataSource.getPageCount();
+  goToPage(pageNumber, animate = true) {  // 这个是给指示点击跳转
+    var pageCount = this.props.dataSource.getPageCount();  // 总页数
     if (pageNumber < 0 || pageNumber >= pageCount) {
       console.error('Invalid page number: ', pageNumber);
-      return
+      return;
     }
-
     var step = pageNumber - this.state.currentPage;
+    console.log(pageNumber, this.state.currentPage, step, 'pageNumber, currentPage, step');
     this.movePage(step, null, animate);
   },
 
   movePage(step, gs, animate = true) {
     var pageCount = this.props.dataSource.getPageCount();
     var pageNumber = this.state.currentPage + step;
+    console.log(step, pageCount, pageNumber, 'step, pageCount, pageNumber');
     if (this.props.isLoop) {
-      pageNumber = (pageNumber + pageCount) % pageCount;
+      pageNumber = (pageNumber + pageCount) % pageCount; // 为了保证是大于0的整数,所以 + 1
+      console.log(pageNumber, 'isLoop, pageNumber');
     } else {
       pageNumber = Math.min(Math.max(0, pageNumber), pageCount - 1);
+      console.log(pageNumber, 'noLoop, pageNumber');
     }
 
     const moved = pageNumber !== this.state.currentPage;
     const scrollStep = (moved ? step : 0) + this.childIndex;
     const nextChildIdx = (pageNumber > 0 || this.props.isLoop) ? 1 : 0;
+
+    console.log(pageNumber, scrollStep, this.childIndex, 'noLoop, pageNumber');
 
     const postChange = () => {
       this.fling = false;
@@ -225,11 +231,11 @@ var ViewPager = React.createClass({
     if (this.props.renderPageIndicator === false) {
       return null;
     } else if (this.props.renderPageIndicator) {
-      return React.cloneElement(this.props.renderPageIndicator(props), props);
+      return React.cloneElement(this.props.renderPageIndicator(), props);
     } else {
       return (
         <View style={styles.indicators}>
-          <DefaultViewPageIndicator {...props} />
+          <DefaultViewPageIndicator {...props} {...this.props.indicator}/>
         </View>
       );
     }
@@ -333,12 +339,12 @@ var ViewPager = React.createClass({
 
 var styles = StyleSheet.create({
   indicators: {
-    flex: 1,
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
+    //flex: 1,
+    //alignItems: 'center',
+    //position: 'absolute',
+    //bottom: 10,
+    //left: 0,
+    //right: 0,
     backgroundColor: 'transparent',
   },
 });

@@ -22,6 +22,16 @@ export default class SearchComponent extends Component {
     }
   }
 
+  _submit() {
+    alert(this.state.text);
+    this.state.text
+      ? this.props.onSearch( this.state.text)
+      : Alert.alert(
+      '提示: ',
+      '请输入相关内容!'
+    );
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -51,15 +61,6 @@ export default class SearchComponent extends Component {
     );
   }
 
-  _submit() {
-    console.log(this.state.text);
-    this.state.text
-      ? this.props.onSearch( this.state.text)
-      : Alert.alert(
-          '提示: ',
-          '请输入相关内容!'
-        );
-  }
 }
 
 
