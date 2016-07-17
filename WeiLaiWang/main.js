@@ -28,12 +28,12 @@ import Calendar from './calendar/calendar';
 import WeatherPage from './weatherPage';
 import Ad from './ad';
 import SearchComponent from './search';
-import Tab from './tab';
+//import Tab from './tab';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 let appData = require('./appData');
 
-//import ViewPager from './viewpager';
+import ViewPager from './ViewPager';
 
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
@@ -50,7 +50,7 @@ function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
 }
 imgLayout();
 let tabHeight = tabWidth / 490 * 245;
-let tabHeights = ( tabHeight + 4 ) * 4 +48;
+let tabHeights = ( tabHeight + 4 ) * 4 + 48;  // 48 是 indicator的高度
 
 let keyboardDismissMode = isIos ? 'interactive' : 'on-drag';
 export default class Main extends Component {
@@ -129,6 +129,7 @@ export default class Main extends Component {
     //if ( isIos ) return;
 
     // 天气, 编辑, 日历, webview!
+    //BackAndroid.exitApp();
     //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
     //  // 第一次给出提示,第二次退出
     //  if( this.backId ) return true;
@@ -325,18 +326,35 @@ export default class Main extends Component {
             { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
               // 保存在state, 加载好了之后, state数据 -- 渲染
 
-              appDataOrders !== '' && <Tab
-                  style={styles.viewpager}
-                  navigator={this.navigator}
-                  onJump={this._onJump.bind(this)}
-                  data={appData[0]}
-                  appDataOrders={appDataOrders}
-                  index={0}
-                  key={'tab' + 0}
-                  deviceLayout={this.deviceLayout}
-                />
+              appDataOrders !== '' && <ViewPager
+                style={styles.viewpager}
+                navigator={this.navigator}
+                data={appData[0]}
+                appDataOrders={appDataOrders}
+                index={0}
+                isLoop={true}
+                key={'tab' + 0}
+                deviceLayout={this.deviceLayout}
+              />
             }
           </View>
+          {
+            //<View style={styles.tabCon}>
+            //  { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
+            //    // 保存在state, 加载好了之后, state数据 -- 渲染
+            //
+            //    appDataOrders !== '' && <Tab
+            //        style={styles.viewpager}
+            //        navigator={this.navigator}
+            //        data={appData[0]}
+            //        appDataOrders={appDataOrders}
+            //        index={0}
+            //        key={'tab' + 0}
+            //        deviceLayout={this.deviceLayout}
+            //      />
+            //  }
+            //</View>
+          }
 
           {  // 轮播图
             appDataOrders !== '' && appDataOrders.map((dataTab, i) => {
@@ -347,7 +365,7 @@ export default class Main extends Component {
                   style={{flex:1, width: WIDTH, height: webViewH, }}
                   onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                   bounces={false}
-                  renderLoading={}
+                  //renderLoading={}
                   renderError={this._renderError.bind(this)}
                   scrollEnabled={false}
                   source={{uri: this.url}}
@@ -355,13 +373,23 @@ export default class Main extends Component {
                 />
               }
               return (
-                <Tab
+                //<Tab
+                //  style={styles.viewpager}
+                //  navigator={this.navigator}
+                //  onJump={this._onJump.bind(this)}
+                //  data={appData[i]}
+                //  appDataOrders={appDataOrders}
+                //  index={i}
+                //  key={'tab' + i}
+                //  deviceLayout={this.deviceLayout}
+                ///>
+                <ViewPager
                   style={styles.viewpager}
                   navigator={this.navigator}
-                  onJump={this._onJump.bind(this)}
                   data={appData[i]}
                   appDataOrders={appDataOrders}
                   index={i}
+                  isLoop={true}
                   key={'tab' + i}
                   deviceLayout={this.deviceLayout}
                 />
@@ -392,7 +420,7 @@ export default class Main extends Component {
           </View>
           <DeliveryBtnCon
             onSearch={this._onJump.bind(this)}
-            scrollView={this._scrollView}
+            //scrollView={this._scrollView}
             scrollLayout={this.scrollLayout}
           />
           <Ad />

@@ -72,7 +72,6 @@ export default class DeliveryBtnCon extends Component {
 
     this.state = {
       activeBtn: 'yuantong',
-      marginBottom: 0,
     }
   }
 
@@ -81,7 +80,6 @@ export default class DeliveryBtnCon extends Component {
 
     // 天气, 编辑, 日历, webview!
     this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      this.onBlur();
       return true;
     });
   }
@@ -97,26 +95,26 @@ export default class DeliveryBtnCon extends Component {
     });
   }
 
-  _onBlur() {
-    console.log(this.props.scrollLayout);
-    this.setState({
-      marginBottom: 0,
-    });
-    setTimeout( () => {
-      this.props.scrollView.scrollTo({x: 0,y: this.props.scrollLayout, animated: true})
-    }, 300)
-  }
-
-  _onFocus() {
-    console.log(this.scrollLayout, 'onFocus');
-    this.setState({
-      marginBottom: 180,
-    });
-
-    setTimeout( () => {
-      this.props.scrollView.scrollTo({x: 0,y: this.scrollLayout, animated: true})
-    }, 300)
-  }
+  //_onBlur() {
+  //  console.log(this.props.scrollLayout);
+  //  this.setState({
+  //    marginBottom: 0,
+  //  });
+  //  setTimeout( () => {
+  //    this.props.scrollView.scrollTo({x: 0,y: this.props.scrollLayout, animated: true})
+  //  }, 300)
+  //}
+  //
+  //_onFocus() {
+  //  console.log(this.scrollLayout, 'onFocus');
+  //  this.setState({
+  //    marginBottom: 180,
+  //  });
+  //
+  //  setTimeout( () => {
+  //    this.props.scrollView.scrollTo({x: 0,y: this.scrollLayout, animated: true})
+  //  }, 300)
+  //}
 
   render() {
     return (
@@ -131,7 +129,7 @@ export default class DeliveryBtnCon extends Component {
           //onBlur={this._onBlur.bind(this)}
           onSearch={this._onSearchDelivery.bind(this)}
         />
-        <View style={[styles.deliveryBtns, { marginBottom: this.state.marginBottom }]}>
+        <View style={[styles.deliveryBtns]}>
           {
             DeliveryArr.map((arr) => <DeliveryBtn
               id={arr.id}
