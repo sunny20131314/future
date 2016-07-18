@@ -118,10 +118,12 @@ export default class DeliveryBtnCon extends Component {
 
   render() {
     return (
-      <View onLayout={(e) => {
-        console.log(e.nativeEvent.layout.y, 'view');
-        this.scrollLayout = e.nativeEvent.layout.y;
-      }}>
+      <View
+        //onLayout={(e) => {
+        //console.log(e.nativeEvent.layout.y, 'view');
+        //this.scrollLayout = e.nativeEvent.layout.y;
+      //}}
+      >
         <SearchComponent
           placeholder="请输入快递单号..."
           keyboardType='numeric'

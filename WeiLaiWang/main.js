@@ -33,13 +33,13 @@ import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 let appData = require('./appData');
 
-import ViewPager from './ViewPager';
+import ViewPager from './viewpager';
 
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
 let isIos = Platform.OS === 'ios';
-var baseHeight = isIos ?  0 : 16;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
+var baseHeight = isIos ?  0 : 24;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
 global.isIos = isIos;
@@ -72,7 +72,6 @@ export default class Main extends Component {
       isToTop: false,
       isRefreshing: true,
       appDataOrders: '',      //所有tab页数据
-      lottery: '',
     };
 
     this.deviceLayout={
@@ -87,6 +86,8 @@ export default class Main extends Component {
     };
 
     this.navigator = this.props.navigator;
+    console.log( this.navigator );
+
   }
 
   static propTypes = {
@@ -122,33 +123,73 @@ export default class Main extends Component {
     }
   }
 
+
 // 获得tab页的数据
   componentWillMount() {
     this._loadInitialState();
+    this.listenBack = BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid.bind(this));
+  }
 
-    //if ( isIos ) return;
+  onBackAndroid() {
+    // 天气, 日历 —— 返回上一页面,即默认! done
+    // 编辑 —— replace    done
+    // webview —— goBack!!!
+    let nav = this.navigator;
+    let routers = nav.getCurrentRoutes();
+    let len = routers.length;
 
-    // 天气, 编辑, 日历, webview!
-    //BackAndroid.exitApp();
-    //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-    //  // 第一次给出提示,第二次退出
-    //  if( this.backId ) return true;
-    //  this.backId = setTimeout( () => {
-    //    ToastAndroid.show('再按一次, 退出程序', ToastAndroid.SHORT);
-    //  }, 1);
-    //  setTimeout( () => {
-    //    clearTimeout(this.backId);
-    //  }, 300);
-    //});
+    const top = routers[routers.length - 1];
+    console.log(nav, routers, len, top, 'nav, routers, len, top');
+
+    if (top.ignoreBack || top.component.ignoreBack){
+      // 路由或组件上决定这个界面忽略back键
+      return true;
+    }
+
+    const handleBack = top.handleBack || top.component.handleBack;
+    if ( handleBack ) {
+      console.log(top.handleBack, top.component.handleBack, 'top.component.handleBack');
+      //路由或组件上决定这个界面自行处理back键
+      return handleBack();
+    }
+
+    //return true;
+
+    //// 如果没有handleBack事件, pop or exit
+
+    // 多于两个navigator,则pop,
+    if (len > 1) {
+      this.navigator.pop();
+      return true;
+    }
+
+    console.log(this.lastBackPressed, 'lastBackPressed');
+    if (this.lastBackPressed && this.lastBackPressed + 2000 >= Date.now()) {
+      console.warn(this.lastBackPressed, 'exit~~~');
+      //最近2秒内按过back键，可以退出应用。
+      BackAndroid.exitApp();
+      return false;  // 测试无反应!!!
+    }
+
+    this.lastBackPressed = Date.now();
+    ToastAndroid.show('再按一次退出应用',  ToastAndroid.SHORT);
+    return true;
   }
 
   componentDidMount() {
-    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
     setTimeout(() => {
       this.setState({
         isRefreshing: false
       });
     }, 800);
+  }
+
+  componentWillUnmount() {
+    if ( !isIos ) {
+
+      BackAndroid.removeEventListener('hardwareBackPress', this.onBackAndroid.bind(this));
+      //BackAndroid.removeEventListener('hardwareBackPress', this.listenBack);
+    }
   }
 
   componentDidUpdate() {
@@ -168,19 +209,6 @@ export default class Main extends Component {
   }
 
   _onScroll(e) {
-    // 页面偏卡,
-    //clearTimeout(this.scrollId);
-    //let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
-    //this.scrollId = setTimeout( () => {
-    //  this.setState({
-    //    isToTop: offsetY > 300,
-    //  });
-    //}, 300);
-
-    //this.
-    this.scrollLayout = e.nativeEvent.contentSize.height - scrollHeight;
-    console.log(e.nativeEvent, this.scrollLayout, scrollHeight, 'onscroll, scrollLayout, scrollHeight');
-
     let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
     this.setState({
       isToTop: offsetY > 200,
@@ -190,6 +218,9 @@ export default class Main extends Component {
 
   _renderError() {
     // -- 当前webview, 和组件添加加载出错提示语.
+    return(
+      <Text>加载出错,请稍后再试!</Text>
+    )
 
   }
 
@@ -229,7 +260,12 @@ export default class Main extends Component {
       navigator.push({
         name: 'webView',
         component: WebViewCom,
-        params: { url }
+        params: {
+          url,
+        },
+        handleBack: function() {
+          console.log('handleBack');
+        }
       })
     }
   }
@@ -240,6 +276,7 @@ export default class Main extends Component {
 
   _onRefresh() {
     this.setState({isRefreshing: true});
+    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
 
     // 加载相关数据 : 天气,广告, 新闻!
     setTimeout(() => {
@@ -251,6 +288,7 @@ export default class Main extends Component {
 
   _onNavigationStateChange(nav) {
     let url = nav.url;
+    //console.info(nav, 'nav');
 
     // ios: nav.navigationType = other/ click
     // android: nav.loading = true (2) false
@@ -260,9 +298,16 @@ export default class Main extends Component {
     }
 
     if ( isIos && nav.navigationType || !isIos && !nav.canGoBack && nav.loading ) {
+      this.refs.webview.setNativeProps({style: {opacity: 0}});
       console.info('jump');
       this._onJump( url );
       this.WebViewNews.goBack();
+
+      // 解决webview跳转过程中的页面显示
+      setTimeout( () => {
+        console.log(111);
+        this.refs.webview.setNativeProps({style: {opacity: 1}});
+      }, 1000)
     }
   }
 
@@ -315,6 +360,7 @@ export default class Main extends Component {
                 date={this.state.date}
                 onJumpCalendar={this._onJumpCalendar.bind(this)}
                 onJumpWeatherPage={this._onJumpWeatherPage.bind(this)}
+                //onAlreadyGetData={this._onAlreadyGetData.bind(this)}
                 height={HEIGHT}
                 width={WIDTH}
           />
@@ -324,12 +370,13 @@ export default class Main extends Component {
           </View>
           <View style={styles.tabCon}>
             { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
-              // 保存在state, 加载好了之后, state数据 -- 渲染
+              // 保存在state, 加载好了之后, state数据 渲染
 
               appDataOrders !== '' && <ViewPager
                 style={styles.viewpager}
                 navigator={this.navigator}
                 data={appData[0]}
+                onJump={this._onJump.bind(this)}
                 appDataOrders={appDataOrders}
                 index={0}
                 isLoop={true}
@@ -338,54 +385,35 @@ export default class Main extends Component {
               />
             }
           </View>
-          {
-            //<View style={styles.tabCon}>
-            //  { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
-            //    // 保存在state, 加载好了之后, state数据 -- 渲染
-            //
-            //    appDataOrders !== '' && <Tab
-            //        style={styles.viewpager}
-            //        navigator={this.navigator}
-            //        data={appData[0]}
-            //        appDataOrders={appDataOrders}
-            //        index={0}
-            //        key={'tab' + 0}
-            //        deviceLayout={this.deviceLayout}
-            //      />
-            //  }
-            //</View>
-          }
 
           {  // 轮播图
             appDataOrders !== '' && appDataOrders.map((dataTab, i) => {
               if( !i ) {
-                return <WebView
+                return <View
+                  style={{flex:1, width: WIDTH, height: webViewH, backgroundColor: '#fff',}}
                   key={'webViewNews'}
-                  ref={(webView) => this.WebViewNews = webView}
-                  style={{flex:1, width: WIDTH, height: webViewH, }}
-                  onNavigationStateChange={this._onNavigationStateChange.bind(this)}
-                  bounces={false}
-                  //renderLoading={}
-                  renderError={this._renderError.bind(this)}
-                  scrollEnabled={false}
-                  source={{uri: this.url}}
-                  scalesPageToFit={true}
-                />
+                  ref="webview"
+                >
+                  {
+                      <WebView
+                        ref={(webView) => this.WebViewNews = webView}
+                        onNavigationStateChange={this._onNavigationStateChange.bind(this)}
+                        bounces={false}
+                        //renderLoading={}
+                        renderError={this._renderError.bind(this)}
+                        scrollEnabled={false}
+                        source={{uri: this.url}}
+                        scalesPageToFit={true}
+                      />
+                  }
+
+                </View>
               }
               return (
-                //<Tab
-                //  style={styles.viewpager}
-                //  navigator={this.navigator}
-                //  onJump={this._onJump.bind(this)}
-                //  data={appData[i]}
-                //  appDataOrders={appDataOrders}
-                //  index={i}
-                //  key={'tab' + i}
-                //  deviceLayout={this.deviceLayout}
-                ///>
                 <ViewPager
                   style={styles.viewpager}
                   navigator={this.navigator}
+                  onJump={this._onJump.bind(this)}
                   data={appData[i]}
                   appDataOrders={appDataOrders}
                   index={i}
@@ -421,7 +449,7 @@ export default class Main extends Component {
           <DeliveryBtnCon
             onSearch={this._onJump.bind(this)}
             //scrollView={this._scrollView}
-            scrollLayout={this.scrollLayout}
+            //scrollLayout={this.scrollLayout}
           />
           <Ad />
           <BdBtm />
@@ -431,7 +459,11 @@ export default class Main extends Component {
           this.state.isToTop && <TouchableOpacity
             style={[styles.goTop, {opacity: this.state.fadeAnim,}]}
             onPress={() => {
-              this._scrollView.scrollTo({x: 0,y: 0, animated: true});
+
+              setTimeout( () => {
+                console.log('top~~~');
+                this._scrollView.scrollTo({x: 0,y: 0, animated: true});
+              }, 1);
               this.setState({
                 isToTop: false
               });

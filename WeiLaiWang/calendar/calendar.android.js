@@ -6,8 +6,7 @@ import {
   View,
   ListView,
   Dimensions,
-  Platform,
-  BackAndroid,
+  //Platform,
   ViewPagerAndroid,
   Picker,
   ScrollView,
@@ -20,7 +19,6 @@ import {
 const Item = Picker.Item;
 import chineseLunar from "./chinese-lunar";
 let {height, width} = Dimensions.get('window');
-let isIos = Platform.OS === 'ios';
 
 export default class Main extends Component {
   static propTypes = {
@@ -52,11 +50,6 @@ export default class Main extends Component {
 
   componentWillMount() {
     this.monthDay = [31, 28 + this.isLeap(this.state.year), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      this._returnMain();
-      return true;
-    })
   }
 
   nextMonth() {

@@ -44,7 +44,7 @@ class CityPick extends Component {
           this.setState({city: city});
         }}
       >
-        { cityArr.map( (city) => <Item label={city} value={city} key={city} /> ) }
+        { cityArr.map( (city) => <Item style={{fontSize: 12,}} label={city} value={city} key={city} /> ) }
       </Picker>
     )
   }
@@ -55,7 +55,7 @@ class Ball extends Component {
     super(props);
 
     this.state = {
-      redBall: '',
+      redBall: ['', '', '', '', '', ''],
       blueBall: ''
     };
 
@@ -90,7 +90,7 @@ class Ball extends Component {
     return(
       <View style={styles.ball}>
         {
-          redBall !== '' && redBall.map((number, i) => (
+          redBall.map((number, i) => (
             <Image
               style={styles.ballImg}
               source={require('./img/redball.png')}
@@ -101,7 +101,7 @@ class Ball extends Component {
           ))
         }
         {
-          blueBall !== '' && <Image
+          <Image
             style={styles.ballImg}
             source={require('./img/blueball.png')}
             key={'blueBall'}
@@ -495,6 +495,8 @@ export default class Mess extends Component {
         this.setState({
           weather: data
         });
+
+        this.props.onAlreadyGetData();
       }
     }).catch(err => {
       console.warn(err);
@@ -618,28 +620,7 @@ export default class Mess extends Component {
                 </Text>)
             }
           </View>
-          <View style={styles.hdBottom}>
-            {
-              isIos
-                ?  <TouchableHighlight
-                      activeOpacity={.8}
-                      onPress={() => this.setState({showPick: true})}
-                      underlayColor="rgba(255, 255, 255, 0.6)"
-                      style={styles.hdBottomItem}
-                    >
-                      <View style={styles.cityPick}>
-                        <Image
-                          style={styles.cityPic}
-                          source={require('./img/location1.png')}
-                        >
-                        </Image>
-                        <Text>
-                          {this.state.city}
-                        </Text>
-                      </View>
-                    </TouchableHighlight>
-                : <CityPick city={this.state.city} onCityChange={this._onCityChange.bind(this)} />
-            }
+          <View style={[styles.hdBottom, {paddingLeft: 10, paddingRight: 10,}]}>
             <TouchableHighlight
               activeOpacity={.8}
               onPress={() => this.props.onJump('http://3g.d1xz.net/astro/')}
@@ -648,6 +629,26 @@ export default class Mess extends Component {
             >
               <Text>
                 星座
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              activeOpacity={.8}
+              onPress={() => this.props.onJump('http://m.ziroom.com/')}
+              underlayColor="rgba(255, 255, 255, 0.6)"
+              style={styles.hdBottomItem}
+            >
+              <Text>
+                租房
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              activeOpacity={.8}
+              onPress={() => this.props.onJump('http://m.edu.k618.cn/camp/')}
+              underlayColor="rgba(255, 255, 255, 0.6)"
+              style={styles.hdBottomItem}
+            >
+              <Text>
+                图片
               </Text>
             </TouchableHighlight>
           </View>
@@ -671,27 +672,44 @@ export default class Mess extends Component {
               </View>
             </View>
           </TouchableHighlight>
-          <View style={styles.hdBottom}>
-            <TouchableHighlight
-              activeOpacity={.8}
-              onPress={() => this.props.onJump('http://m.edu.k618.cn/camp/')}
-              underlayColor="rgba(255, 255, 255, 0.6)"
-              style={styles.hdBottomItem}
-            >
-              <Text>
-                图片
-              </Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              activeOpacity={.8}
-              onPress={() => this.props.onJump('http://m.ziroom.com/')}
-              underlayColor="rgba(255, 255, 255, 0.6)"
-              style={styles.hdBottomItem}
-            >
-              <Text>
-                租房
-              </Text>
-            </TouchableHighlight>
+          <View style={[styles.hdBottom, {justifyContent: 'center'}]}>
+            {
+              isIos
+                ?  <TouchableHighlight
+                activeOpacity={.8}
+                onPress={() => this.setState({showPick: !this.state.showPick})}
+                underlayColor="rgba(255, 255, 255, 0.6)"
+                style={[styles.hdBottomItem]}
+              >
+                <View style={styles.cityPick}>
+                  <Image
+                    style={styles.cityPic}
+                    source={require('./img/location1.png')}
+                  >
+                  </Image>
+                  <Text>
+                    {this.state.city}
+                  </Text>
+                </View>
+              </TouchableHighlight>
+                : <View>
+                <View style={styles.cityPick}>
+                  <Image
+                    style={styles.cityPic}
+                    source={require('./img/location1.png')}
+                  >
+                  </Image>
+                  <Text>
+                    {this.state.city}
+                  </Text>
+                </View>
+                <CityPick
+                  city={this.state.city}
+                  onCityChange={this._onCityChange.bind(this)}
+                  style={{position: 'absolute', top: 0, opacity: 0}}
+                />
+              </View>
+            }
           </View>
         </View>
         <View style={styles.hdRight}>
@@ -773,7 +791,6 @@ const styles = StyleSheet.create({
     height: 40,
   },
   hdBottom: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -783,7 +800,8 @@ const styles = StyleSheet.create({
     //borderStyle: 'dotted',
   },
   hdBottomItem: {
-    padding: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   weatherPic: {
     width: 32,
@@ -818,8 +836,9 @@ const styles = StyleSheet.create({
     height: 14,
   },
   picker: {
+    justifyContent: 'center',
     width: 98,
-    height: 100,
+    height: 40,
   },
   modalCity: {
     width: width,
@@ -835,6 +854,8 @@ const styles = StyleSheet.create({
   cityPick: {
     flexDirection: 'row',
     alignItems: 'center',
+    //paddingLeft: 6,
+    //paddingRight: 6,
   },
   cityPic: {
     width: 12,

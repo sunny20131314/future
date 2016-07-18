@@ -26,6 +26,7 @@ import {
 
 import Indicator from './ViewPageIndicator';
 import dragBtn from './dragBtn';
+import Main from './main';
 
 let {height, width} = Dimensions.get('window');
 
@@ -65,27 +66,35 @@ export default class ViewPager extends Component {
     };
   }
 
-  next() {
-    //console.log( this.scrollLeft, 'before this.scrollLeft, next');
+  componentDidMount() {
+    console.log(this.scrollLeft, 'this.scrollLeft');
+
+    // android
+    setTimeout( () => {
+      this.refs.trueScroll.scrollTo({x: this.scrollLeft, y: 0, animated: false});
+    }, 1);
+  }
+
+  next(scrollX) {
+    // 要判断是否滚动到相应的位置了
+    console.log( scrollX / 375, this.scrollLeft / 375, 'scrollX, before this.scrollLeft, next');
     this.scrollLeft += this.WIDTH;
-    //console.log( this.scrollLeft, 'now this.scrollLeft, next');
+
+    if ( scrollX !== this.scrollLeft ) {
+      return false;
+    }
+    console.log( scrollX / 375, this.scrollLeft / 375, 'scrollX, now this.scrollLeft, next');
     this.setState({
       activePage: ++ this.state.activePage
     });
-
-    //let currentPage = this.state.currentPage;
-    //currentPage = currentPage + 1 === this.len ? 0 : currentPage + 1;
-    //this.setState({
-    //  currentPage: currentPage
-    //});
-    //console.log( 'next');
-    //this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
   }
 
-  prev() {
-    //console.log( this.scrollLeft, 'before this.scrollLeft, prev');
+  prev(scrollX) {
     this.scrollLeft -= this.WIDTH;
-    //console.log( this.scrollLeft, 'now this.scrollLeft, prev');
+
+    if ( scrollX !== this.scrollLeft ) {
+      return false;
+    }
     this.setState({
       activePage: -- this.state.activePage
     });
@@ -94,14 +103,18 @@ export default class ViewPager extends Component {
   myScrollIos(event) {
     let len = this.len;
     let scrollX = event.nativeEvent.contentOffset.x;
-    //console.log(scrollX, 'scrollX');
+    console.log(scrollX, 'scrollX');
 
     // isLoop = true;
     let endX = width * (len + 1);
     if ( this.isLoop ) {
       if( scrollX === 0 ) { // 滚动到最左
         console.log( 'scroll to start');
-        this.refs.trueScroll.scrollTo({x: width * len, y: 0, animated: false});
+
+        // scrollview has a layout animation when create,so, you must delay it after the animation
+        setTimeout( () => {
+          this.refs.trueScroll.scrollTo({x: width * len, y: 0, animated: false});
+        }, 1);
         this.scrollLeft = width * len;
         this.setState({
           activePage: len - 1
@@ -110,7 +123,9 @@ export default class ViewPager extends Component {
       }
       else if ( scrollX === endX ) { // 滚动到最右
         console.log( 'scroll to end');
-        this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
+        setTimeout( () => {
+          this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
+        }, 1);
         this.scrollLeft = width;
         this.setState({
           activePage: 0
@@ -122,18 +137,20 @@ export default class ViewPager extends Component {
     // 当前滚动到的位置(相对于真正的view(不包括前后添加))
     // 这逻辑得改啊... scrollLeft
     if (scrollX > this.scrollLeft) {
-      this.next();
+      this.next(scrollX);
     } else if (scrollX < this.scrollLeft) {
-      this.prev();
+      this.prev(scrollX);
     }
   }
 
   _goToPage(i) {
-
     console.log(i, '_goToPage');
 
     let scrollLeft = this.isLoop ? ( i + 1 ) * width : i * width;
+
     console.log(i, scrollLeft, '_goToPage, scrollLeft');
+
+
     this.refs.trueScroll.scrollTo({x: scrollLeft, y: 0, animated: false});
     this.scrollLeft = scrollLeft;
     this.setState({
@@ -154,6 +171,13 @@ export default class ViewPager extends Component {
         activePage: activePage,   //page页
         appDataOrders: this.appDataOrders,    //显示的全部数据顺序
         data: this.data[activePage],    //该页面的全部数据
+      },
+      handleBack: function() {
+        navigator.replace({
+          name: 'Main',
+          component: Main,
+        });
+        return true;
       }
     });
   }
@@ -166,11 +190,11 @@ export default class ViewPager extends Component {
       let end = this.len -1;
       let dataEnd = this.data[end];
       addStartEl = <View
-        style={[styles.page, {width: this.WIDTH, height: 400}]}
+        style={[styles.page, {width: this.WIDTH}]}
         key={'pageStart'}
       >
         {
-          this.order[end].map( (d, i) => {
+          this.order[end].slice(0, 8).map( (d, i) => {
           return (
           <TouchableHighlight
             key={'-1img' + i}
@@ -191,11 +215,11 @@ export default class ViewPager extends Component {
       </View>;
       let dataStart = this.data[0];
       addEndEl = <View
-        style={[styles.page, {width: this.WIDTH, height: 400}]}
+        style={[styles.page, {width: this.WIDTH}]}
         key={'pageEnd'}
       >
         {
-          this.order[0].map( (d, i) => {
+          this.order[0].slice(0, 8).map( (d, i) => {
             return (
               <TouchableHighlight
                 key={'-1img' + i}
@@ -226,9 +250,8 @@ export default class ViewPager extends Component {
           onJumpEdit={this._onJumpEdit.bind(this)}
         />
         <ScrollView
-          style={{height: 400}}
           horizontal={true}
-          contentOffset={{x: isLoop ? this.WIDTH : 0, y: 0}}
+          contentOffset={{x: this.scrollLeft, y: 0}}
           alwaysBounceHorizontal={true}
           onMomentumScrollEnd={event=>this.myScrollIos(event)}
           ref="trueScroll"
@@ -254,8 +277,8 @@ export default class ViewPager extends Component {
                         <TouchableHighlight
                           key={index + 'img' + i}
                           onPress={() => {
-                          console.log('press');
-                        }}
+                            this.props.onJump(dataS[d].href);
+                          }}
                           underlayColor="transparent"
                         >
                           <Image

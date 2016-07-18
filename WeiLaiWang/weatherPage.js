@@ -11,10 +11,8 @@ import {
   Image,
   Text,
   View,
-  BackAndroid,
-  Platform
+  //Platform
 } from 'react-native';
-let isIos = Platform.OS === 'ios';
 
 export default class WeatherPage extends Component {
   constructor(props) {
@@ -28,15 +26,6 @@ export default class WeatherPage extends Component {
     };
   }
 
-  componentWillMount() {
-
-    if ( !isIos ) return;
-    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      this._returnMain();
-      return true;
-    })
-  }
-
   _returnMain() {
     let {navigator} = this.props;
     if (navigator.getCurrentRoutes().length > 1) {
@@ -46,7 +35,7 @@ export default class WeatherPage extends Component {
   weekday = ["日","一","二","三","四","五","六"];
 
   _renderRow(rowData: string, sectionID: number, rowID: number) {
-    console.log(rowData, rowID);
+    //console.log(rowData, rowID);
     let srcDay = '', srcNight = '';
     let {code_d, code_n, txt_d, txt_n} = rowData.cond;
 

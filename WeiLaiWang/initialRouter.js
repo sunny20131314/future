@@ -7,6 +7,7 @@ import {
   AppRegistry,
   StyleSheet,
   Navigator,
+  BackAndroid,
   Text,
   View
 } from 'react-native';
@@ -26,6 +27,7 @@ export default class RouteComponent extends Component {
             return (
             <Components
               {...route.params}
+              handleBack={route.handleBack}
               name={route.name}
               navigator={navigator}
               />)

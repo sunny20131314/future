@@ -11,7 +11,6 @@ import {
   Dimensions,
   Animated,
   TouchableHighlight,
-  BackAndroid,
   ToastAndroid,
   AlertIOS,
   AsyncStorage,
@@ -58,18 +57,10 @@ export default class MyComponent extends Component {
     this.navigator && this.navigator.replace({
       name: 'Main',
       component: Main,
-      params: {
-        noRefresh: true,
-      }
     });
   }
 
   componentWillMount() {
-    if ( !isIos ) return;
-    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      this._returnMain();
-      return true;
-    })
   }
 
   componentDidMount() {

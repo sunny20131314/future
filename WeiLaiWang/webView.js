@@ -43,10 +43,16 @@ export default class WebViewCom extends Component {
   };
 
   componentWillMount() {
-    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      this.goBack();
-      return true;
-    })
+    // 咳咳, 手动绑定, 后期改
+    let routers = this.navigator.getCurrentRoutes();
+    let len = routers.length;
+    const top = routers[routers.length - 1];
+
+    top.handleBack = this.goBack.bind(this);
+    //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
+    //  this.goBack();
+    //  return true;
+    //})
   }
 
   onError() {
@@ -56,12 +62,8 @@ export default class WebViewCom extends Component {
     );
   }
 
-  returnMain() {
-    this.navigator.pop();  // 回到最顶层的路由
-  }
-
   goBack() {
-    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.returnMain();
+    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.navigator.pop();;
   }
 
   onShouldStartLoadWithRequest(event) {
@@ -106,7 +108,7 @@ export default class WebViewCom extends Component {
             </TouchableOpacity>
             <Text style={[styles.title]} numberOfLines={1}>{this.state.title}</Text>
             <TouchableOpacity
-              onPress={this.returnMain.bind(this)}
+              onPress={() => this.navigator.pop()}
             >
               <Image
                 source={require('./img/logo.jpg')}
