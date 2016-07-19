@@ -30,7 +30,7 @@ export default class WebViewCom extends Component {
     this.navigator = this.props.navigator;
 
     this.state = {
-      url: this.props.url,
+      //url: this.props.url,
       title: '加载中,请稍后...',
       backButtonEnabled: false,
       loading: true,
@@ -43,27 +43,24 @@ export default class WebViewCom extends Component {
   };
 
   componentWillMount() {
-    // 咳咳, 手动绑定, 后期改
+    // TODO, 手动绑定函数, 后期改
     let routers = this.navigator.getCurrentRoutes();
-    let len = routers.length;
-    const top = routers[routers.length - 1];
-
+    let top = routers[routers.length - 1];
     top.handleBack = this.goBack.bind(this);
-    //this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-    //  this.goBack();
-    //  return true;
-    //})
+
+    routers = null;
+    top = null;
   }
 
   onError() {
-    Alert.alert(
-      '提示: ',
-      '加载页面出错,请稍后再试!'
-    );
+    //Alert.alert(
+    //  '提示: ',
+    //  '加载页面出错,请稍后再试!'
+    //);
   }
 
   goBack() {
-    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.navigator.pop();;
+    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.navigator.pop();
   }
 
   onShouldStartLoadWithRequest(event) {
@@ -74,24 +71,16 @@ export default class WebViewCom extends Component {
   }
 
   onNavigationStateChange(nav) {
-    console.log(nav,this.state.url);
-
     // TODO 为了解决 webview 中地址搜索的两个链接的不停跳转(重定向)
-    // ios: 每次跳转页面的时候,会触发两次: 第一次: navigationType: click, other(push);
     // 第二次: 拿到页面的相关数据  米有 navigationType
-
     // android: loading触发三次: 2次loading, 1次loading: false
-    if( ( isIos && nav.navigationType ) || ( !isIos && nav.loading )) {
-      return false;
-    }
 
     this.setState({
       loading: nav.loading,
       title: nav.title,
       backButtonEnabled: nav.canGoBack,
-      url: nav.url,
+      //url: nav.url,
     });
-
   }
 
   render() {
@@ -121,7 +110,7 @@ export default class WebViewCom extends Component {
           ref={'webview'}
           automaticallyAdjustContentInsets={true}
           style={styles.webView}
-          source={{uri: this.state.url}}
+          source={{uri: this.props.url}}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           decelerationRate="normal"

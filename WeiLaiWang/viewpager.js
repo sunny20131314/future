@@ -25,10 +25,8 @@ import {
 } from 'react-native';
 
 import Indicator from './ViewPageIndicator';
-import dragBtn from './dragBtn';
+import DragBtn from './dragBtn';
 import Main from './main';
-
-let {height, width} = Dimensions.get('window');
 
 export default class ViewPager extends Component {
   constructor(props) {
@@ -67,23 +65,19 @@ export default class ViewPager extends Component {
   }
 
   componentDidMount() {
-    console.log(this.scrollLeft, 'this.scrollLeft');
-
     // android
     setTimeout( () => {
       this.refs.trueScroll.scrollTo({x: this.scrollLeft, y: 0, animated: false});
-    }, 1);
+    }, 10);
   }
 
   next(scrollX) {
     // 要判断是否滚动到相应的位置了
-    console.log( scrollX / 375, this.scrollLeft / 375, 'scrollX, before this.scrollLeft, next');
     this.scrollLeft += this.WIDTH;
 
     if ( scrollX !== this.scrollLeft ) {
       return false;
     }
-    console.log( scrollX / 375, this.scrollLeft / 375, 'scrollX, now this.scrollLeft, next');
     this.setState({
       activePage: ++ this.state.activePage
     });
@@ -103,35 +97,29 @@ export default class ViewPager extends Component {
   myScrollIos(event) {
     let len = this.len;
     let scrollX = event.nativeEvent.contentOffset.x;
-    console.log(scrollX, 'scrollX');
 
-    // isLoop = true;
-    let endX = width * (len + 1);
+    let endX = this.WIDTH * (len + 1);
     if ( this.isLoop ) {
       if( scrollX === 0 ) { // 滚动到最左
-        console.log( 'scroll to start');
-
         // scrollview has a layout animation when create,so, you must delay it after the animation
         setTimeout( () => {
-          this.refs.trueScroll.scrollTo({x: width * len, y: 0, animated: false});
-        }, 1);
-        this.scrollLeft = width * len;
+          this.refs.trueScroll.scrollTo({x: this.WIDTH * len, y: 0, animated: false});
+        }, 10);
+        this.scrollLeft = this.WIDTH * len;
         this.setState({
           activePage: len - 1
         });
-        return false;
       }
       else if ( scrollX === endX ) { // 滚动到最右
-        console.log( 'scroll to end');
         setTimeout( () => {
-          this.refs.trueScroll.scrollTo({x: width, y: 0, animated: false});
-        }, 1);
-        this.scrollLeft = width;
+          this.refs.trueScroll.scrollTo({x: this.WIDTH, y: 0, animated: false});
+        }, 10);
+        this.scrollLeft = this.WIDTH;
         this.setState({
           activePage: 0
         });
-        return false;
       }
+      return false;
     }
 
     // 当前滚动到的位置(相对于真正的view(不包括前后添加))
@@ -144,13 +132,7 @@ export default class ViewPager extends Component {
   }
 
   _goToPage(i) {
-    console.log(i, '_goToPage');
-
-    let scrollLeft = this.isLoop ? ( i + 1 ) * width : i * width;
-
-    console.log(i, scrollLeft, '_goToPage, scrollLeft');
-
-
+    let scrollLeft = this.isLoop ? ( i + 1 ) * this.WIDTH : i * this.WIDTH;
     this.refs.trueScroll.scrollTo({x: scrollLeft, y: 0, animated: false});
     this.scrollLeft = scrollLeft;
     this.setState({
@@ -163,7 +145,7 @@ export default class ViewPager extends Component {
     let activePage = this.state.activePage;
     navigator.replace({
       name: 'edit',
-      component: dragBtn,
+      component: DragBtn,
       params: {
         url: '',
         deviceLayout: this.props.deviceLayout,
@@ -183,7 +165,6 @@ export default class ViewPager extends Component {
   }
 
   render() {
-    //console.log(this.state.activePage, 'this.state.activePage');
     let addStartEl, addEndEl;
     let isLoop = this.props.isLoop;
     if ( isLoop && this.order ) {
@@ -198,9 +179,7 @@ export default class ViewPager extends Component {
           return (
           <TouchableHighlight
             key={'-1img' + i}
-            onPress={() => {
-              console.log('press');
-            }}
+            //onPress={() => {}}
             underlayColor="transparent"
           >
             <Image
@@ -223,9 +202,7 @@ export default class ViewPager extends Component {
             return (
               <TouchableHighlight
                 key={'-1img' + i}
-                onPress={() => {
-              console.log('press');
-            }}
+                //onPress={() => {}}
                 underlayColor="transparent"
               >
                 <Image
@@ -265,7 +242,6 @@ export default class ViewPager extends Component {
             this.order && this.order.map( (data, index) => {
               let data1 = '';
               let dataS = this.data[index];
-              // page
               return (
                 <View
                   style={[styles.page, {width: this.WIDTH}]}

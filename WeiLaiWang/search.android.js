@@ -54,8 +54,6 @@ export default class SearchComponent extends Component {
   }
 
   _submit() {
-    alert(this.state.text, 'submit');
-    //this.props.onBlur && this.props.onBlur();
     this.state.text
       ? this.props.onSearch( this.state.text)
       : ToastAndroid.show('请输入相关内容!', ToastAndroid.SHORT);

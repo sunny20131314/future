@@ -67,8 +67,6 @@ var DefaultViewPageIndicator = React.createClass({
             style={styles.editPic}
             source={require('./img/edit.png')}
           >
-            {            //<Text style={styles.editText}>编辑</Text>
-            }
           </Image>
         </TouchableHighlight>
       </View>

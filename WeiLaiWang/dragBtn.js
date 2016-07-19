@@ -53,7 +53,6 @@ export default class MyComponent extends Component {
   }
 
   _returnMain() {
-    // -- noRefresh 记录由编辑页返回到主页,是否需要刷新,跳转(在Indicator中记录相应的位置 contentOffset.y的位置)
     this.navigator && this.navigator.replace({
       name: 'Main',
       component: Main,

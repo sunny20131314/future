@@ -3,6 +3,7 @@
  * tab页全部数据: tab页数据(地址,链接), tab页数据的相关顺序(展示)
  * 关闭退出程序(系统会弹出 停止运行!!!)
  */
+
 import React, { Component } from 'react';
 import {
   Dimensions,
@@ -13,6 +14,7 @@ import {
   AsyncStorage,
   BackAndroid,
   ToastAndroid,
+  NetInfo,
   TouchableOpacity,
   TouchableHighlight,
   WebView,
@@ -28,7 +30,6 @@ import Calendar from './calendar/calendar';
 import WeatherPage from './weatherPage';
 import Ad from './ad';
 import SearchComponent from './search';
-//import Tab from './tab';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 let appData = require('./appData');
@@ -38,13 +39,14 @@ import ViewPager from './viewpager';
 // 计算每个image的大小,高宽和图等比例!
 let WIDTH = Dimensions.get('window').width;
 let HEIGHT = Dimensions.get('window').height;
+
 let isIos = Platform.OS === 'ios';
 var baseHeight = isIos ?  0 : 24;  // 手机自带导航栏的高度, ios为0, 安卓暂时不确定
 let scrollHeight = HEIGHT - 45 - baseHeight;   // scrollView 的高度(-顶部导航)
 
-global.isIos = isIos;
+//global.isIos = isIos;
 let webViewH = WIDTH / 980 * 290;
-let tabWidth ;
+let tabWidth = 200;
 function imgLayout(num =2, margin = 4) { // margin 为元素之间的边距
   tabWidth = (WIDTH-margin * (num - 1))/num;
 }
@@ -72,6 +74,11 @@ export default class Main extends Component {
       isToTop: false,
       isRefreshing: true,
       appDataOrders: '',      //所有tab页数据
+      city: '北京',
+      ball: {
+        redBall: ['', '', '', '', '', ''],
+        blueBall: ''
+      },
     };
 
     this.deviceLayout={
@@ -86,8 +93,6 @@ export default class Main extends Component {
     };
 
     this.navigator = this.props.navigator;
-    console.log( this.navigator );
-
   }
 
   static propTypes = {
@@ -100,7 +105,6 @@ export default class Main extends Component {
     try {
       var value = await AsyncStorage.getItem('appDataOrders');
       value = JSON.parse(value);
-      console.log(value, 'value');
       if (value !== null){
         this.setState({appDataOrders: value});
       } else {
@@ -109,7 +113,7 @@ export default class Main extends Component {
         for(let m = 0, len = appData.length; m !== len; m++ ){
           let tab = appData[m].data;   // 每个tab页的数据
           let tabIndex = appDataOrders[m] = []; // 传递每一个tab的数据
-          console.log(tab, 'tab');
+
           let indexLen = tab.length;
           for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
             tabIndex[n] = Object.keys(tab[n]);   // 保存全部数据的顺序
@@ -119,27 +123,29 @@ export default class Main extends Component {
         await AsyncStorage.setItem('appData', JSON.stringify(appDataOrders));
       }
     } catch (error) {
-      console.warn(error);
+      console.log(error);
     }
   }
 
-
-// 获得tab页的数据
+  // 获得tab页的数据
   componentWillMount() {
     this._loadInitialState();
+
+    NetInfo.isConnected.fetch().done((isConnected) => {
+      !isConnected && alert('没有联网(⊙o⊙),请连接网络~~~');
+    });
+
     this.listenBack = BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid.bind(this));
   }
 
   onBackAndroid() {
     // 天气, 日历 —— 返回上一页面,即默认! done
     // 编辑 —— replace    done
-    // webview —— goBack!!!
+    // webview —— goBack!!!  done
     let nav = this.navigator;
     let routers = nav.getCurrentRoutes();
     let len = routers.length;
-
     const top = routers[routers.length - 1];
-    console.log(nav, routers, len, top, 'nav, routers, len, top');
 
     if (top.ignoreBack || top.component.ignoreBack){
       // 路由或组件上决定这个界面忽略back键
@@ -148,24 +154,17 @@ export default class Main extends Component {
 
     const handleBack = top.handleBack || top.component.handleBack;
     if ( handleBack ) {
-      console.log(top.handleBack, top.component.handleBack, 'top.component.handleBack');
       //路由或组件上决定这个界面自行处理back键
       return handleBack();
     }
 
-    //return true;
-
     //// 如果没有handleBack事件, pop or exit
-
-    // 多于两个navigator,则pop,
     if (len > 1) {
       this.navigator.pop();
       return true;
     }
 
-    console.log(this.lastBackPressed, 'lastBackPressed');
     if (this.lastBackPressed && this.lastBackPressed + 2000 >= Date.now()) {
-      console.warn(this.lastBackPressed, 'exit~~~');
       //最近2秒内按过back键，可以退出应用。
       BackAndroid.exitApp();
       return false;  // 测试无反应!!!
@@ -193,11 +192,15 @@ export default class Main extends Component {
   }
 
   componentDidUpdate() {
-    this.state.isToTop && Animated.timing(       // Uses easing functions
-      this.state.fadeAnim, // The value to drive
+    this.state.isRefreshing && this.setState({
+      isRefreshing: false
+    });
+
+    this.state.isToTop && Animated.timing(
+      this.state.fadeAnim,
       {
-        toValue: 1,        // Target
-        duration: 400,    // Configuration
+        toValue: 1,
+        duration: 400,
       }
     ).start();
   }
@@ -209,23 +212,23 @@ export default class Main extends Component {
   }
 
   _onScroll(e) {
-    let offsetY = Math.abs(e.nativeEvent.contentOffset.y);
+    let offsetY = e.nativeEvent.contentOffset.y;
     this.setState({
       isToTop: offsetY > 200,
     });
 
   }
 
-  _renderError() {
+  _WebViewrenderError() {
     // -- 当前webview, 和组件添加加载出错提示语.
     return(
-      <Text>加载出错,请稍后再试!</Text>
+      <View style={styles.webViewError}>
+        <Text>加载出错,请稍后再试!</Text>
+      </View>
     )
-
   }
 
   _onJumpCalendar() {
-    console.log('calendar');
     let navigator = this.navigator;
     if(navigator) {
       navigator.push({
@@ -239,7 +242,6 @@ export default class Main extends Component {
   }
 
   _onJumpWeatherPage(data) {
-    console.log('calendar');
     let navigator = this.navigator;
     if(navigator) {
       navigator.push({
@@ -263,9 +265,7 @@ export default class Main extends Component {
         params: {
           url,
         },
-        handleBack: function() {
-          console.log('handleBack');
-        }
+        handleBack: ''
       })
     }
   }
@@ -275,10 +275,12 @@ export default class Main extends Component {
   }
 
   _onRefresh() {
-    this.setState({isRefreshing: true});
-    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
+    this.setState({
+      isRefreshing: true,
+    });
 
-    // 加载相关数据 : 天气,广告, 新闻!
+    this._loadInitialState();  // 获取数据
+    // 加载数据-刷新 -- 双色球, 天气, pm, 重新获取!(or 页面重新渲染)
     setTimeout(() => {
       this.setState({
         isRefreshing: false
@@ -288,7 +290,6 @@ export default class Main extends Component {
 
   _onNavigationStateChange(nav) {
     let url = nav.url;
-    //console.info(nav, 'nav');
 
     // ios: nav.navigationType = other/ click
     // android: nav.loading = true (2) false
@@ -299,13 +300,11 @@ export default class Main extends Component {
 
     if ( isIos && nav.navigationType || !isIos && !nav.canGoBack && nav.loading ) {
       this.refs.webview.setNativeProps({style: {opacity: 0}});
-      console.info('jump');
       this._onJump( url );
       this.WebViewNews.goBack();
 
       // 解决webview跳转过程中的页面显示
       setTimeout( () => {
-        console.log(111);
         this.refs.webview.setNativeProps({style: {opacity: 1}});
       }, 1000)
     }
@@ -313,13 +312,12 @@ export default class Main extends Component {
 
   render() {
     let appDataOrders = this.state.appDataOrders;
-    console.log(appDataOrders);
     return (
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableHighlight
             activeOpacity={.8}
-            onPress={() => console.log('press')}
+            //onPress={() => console.log('press')}
             underlayColor="rgba(255, 255, 255, 0.5)"
           >
             <Image
@@ -360,7 +358,9 @@ export default class Main extends Component {
                 date={this.state.date}
                 onJumpCalendar={this._onJumpCalendar.bind(this)}
                 onJumpWeatherPage={this._onJumpWeatherPage.bind(this)}
-                //onAlreadyGetData={this._onAlreadyGetData.bind(this)}
+                city={this.state.city}
+                ball={this.state.ball}
+                //isRefreshing={this.state.isRefreshing}
                 height={HEIGHT}
                 width={WIDTH}
           />
@@ -369,9 +369,7 @@ export default class Main extends Component {
             <SearchComponent placeholder="输入关键词..." onSearch={this._onSearchBaiDu.bind(this)}/>
           </View>
           <View style={styles.tabCon}>
-            { // 第一个轮播图,解决拿数据的过程中,后面的先渲染出来,然后页面闪动渲染数据
-              // 保存在state, 加载好了之后, state数据 渲染
-
+            {
               appDataOrders !== '' && <ViewPager
                 style={styles.viewpager}
                 navigator={this.navigator}
@@ -379,7 +377,7 @@ export default class Main extends Component {
                 onJump={this._onJump.bind(this)}
                 appDataOrders={appDataOrders}
                 index={0}
-                isLoop={true}
+                isLoop={false}
                 key={'tab' + 0}
                 deviceLayout={this.deviceLayout}
               />
@@ -390,7 +388,7 @@ export default class Main extends Component {
             appDataOrders !== '' && appDataOrders.map((dataTab, i) => {
               if( !i ) {
                 return <View
-                  style={{flex:1, width: WIDTH, height: webViewH, backgroundColor: '#fff',}}
+                  style={{flex:1}}
                   key={'webViewNews'}
                   ref="webview"
                 >
@@ -398,12 +396,16 @@ export default class Main extends Component {
                       <WebView
                         ref={(webView) => this.WebViewNews = webView}
                         onNavigationStateChange={this._onNavigationStateChange.bind(this)}
+                        automaticallyAdjustContentInsets={true}
                         bounces={false}
+                        style={[styles.webView, {width: WIDTH, height: webViewH, overflow: 'hidden', }]}
                         //renderLoading={}
-                        renderError={this._renderError.bind(this)}
+                        renderError={this._WebViewrenderError.bind(this)}
+                        startInLoadingState={true}
                         scrollEnabled={false}
                         source={{uri: this.url}}
-                        scalesPageToFit={true}
+                        scalesPageToFit={false}
+                        scrollEnabled={false}
                       />
                   }
 
@@ -417,7 +419,7 @@ export default class Main extends Component {
                   data={appData[i]}
                   appDataOrders={appDataOrders}
                   index={i}
-                  isLoop={true}
+                  isLoop={false}
                   key={'tab' + i}
                   deviceLayout={this.deviceLayout}
                 />
@@ -429,7 +431,7 @@ export default class Main extends Component {
           <View style={styles.indicator}>
             <TouchableHighlight
               activeOpacity={.8}
-              onPress={() => console.log('press')}
+              //onPress={() => console.log('press')}
               underlayColor="rgba(255, 255, 255, 0.6)"
               style={{
                 width: 60,
@@ -448,8 +450,6 @@ export default class Main extends Component {
           </View>
           <DeliveryBtnCon
             onSearch={this._onJump.bind(this)}
-            //scrollView={this._scrollView}
-            //scrollLayout={this.scrollLayout}
           />
           <Ad />
           <BdBtm />
@@ -461,7 +461,6 @@ export default class Main extends Component {
             onPress={() => {
 
               setTimeout( () => {
-                console.log('top~~~');
                 this._scrollView.scrollTo({x: 0,y: 0, animated: true});
               }, 1);
               this.setState({
@@ -527,6 +526,16 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  webView: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    height: 350,
+    overflow: 'hidden',
+  },
+  webViewError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   deliveryBtns: {
     flexDirection: 'row',

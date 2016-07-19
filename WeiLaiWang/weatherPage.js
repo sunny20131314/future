@@ -35,7 +35,6 @@ export default class WeatherPage extends Component {
   weekday = ["日","一","二","三","四","五","六"];
 
   _renderRow(rowData: string, sectionID: number, rowID: number) {
-    //console.log(rowData, rowID);
     let srcDay = '', srcNight = '';
     let {code_d, code_n, txt_d, txt_n} = rowData.cond;
 
@@ -125,7 +124,7 @@ export default class WeatherPage extends Component {
           </TouchableOpacity>
         </View>
         <ListView
-          contentContainerStyle={[styles.weatherScroll, {height: this.props.scrollHeight}]}
+          contentContainerStyle={[styles.weatherScroll, {height: this.props.scrollHeight, paddingLeft: 10,}]}
           dataSource={this.state.dataSource}
           initialListSize={7}
           renderRow={this._renderRow.bind(this)}
@@ -136,7 +135,7 @@ export default class WeatherPage extends Component {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           enableEmptySections={true}
-          pagingEnabled={true}
+          pagingEnabled={false}
         />
       </View>
     );
@@ -187,7 +186,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    //backgroundColor: 'linear-gradient(#50b2fa, #a5d3f6)', // not support
     backgroundColor: 'rgb(124,195,249)',
   },
   textWhite: {

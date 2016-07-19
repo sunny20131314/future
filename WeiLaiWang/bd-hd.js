@@ -54,11 +54,14 @@ class Ball extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      redBall: ['', '', '', '', '', ''],
-      blueBall: ''
-    };
+    this.state = this.props.ball;
+  }
 
+  componentWillMount() {
+    this.fetchBallData();
+  }
+
+  fetchBallData() {
     fetch('http://f.apiplus.cn/ssq-1.json', {
       method: 'GET'
     }).then(response => {
@@ -76,7 +79,7 @@ class Ball extends Component {
         });
       }
     }).catch(err => {
-      console.warn(err);
+      console.log(err);
     });
   }
 
@@ -118,7 +121,7 @@ export default class Mess extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      city: '北京',
+      city: this.props.city,
       showPick: false,
       weatherPic: '',
       weather: '',
@@ -130,357 +133,9 @@ export default class Mess extends Component {
     this.fetchWeather(this.state.city);
   }
 
-  data = {
-    "HeWeather data service 3.0": [
-      {
-        "aqi": {
-          "city": {
-            "aqi": "29",
-            "co": "1",
-            "no2": "32",
-            "o3": "51",
-            "pm10": "21",
-            "pm25": "29",
-            "qlty": "优",
-            "so2": "3"
-          }
-        },
-        "basic": {
-          "city": "北京",
-          "cnty": "中国",
-          "id": "CN101010100",
-          "lat": "39.904000",
-          "lon": "116.391000",
-          "update": {
-            "loc": "2016-07-13 09:51",
-            "utc": "2016-07-13 01:51"
-          }
-        },
-        "daily_forecast": [
-          {
-            "astro": {
-              "sr": "04:57",
-              "ss": "19:43"
-            },
-            "cond": {
-              "code_d": "100",
-              "code_n": "101",
-              "txt_d": "晴",
-              "txt_n": "多云"
-            },
-            "date": "2016-07-13",
-            "hum": "23",
-            "pcpn": "0.0",
-            "pop": "0",
-            "pres": "1004",
-            "tmp": {
-              "max": "35",
-              "min": "23"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "85",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "10"
-            }
-          },
-          {
-            "astro": {
-              "sr": "04:58",
-              "ss": "19:42"
-            },
-            "cond": {
-              "code_d": "300",
-              "code_n": "104",
-              "txt_d": "阵雨",
-              "txt_n": "阴"
-            },
-            "date": "2016-07-14",
-            "hum": "27",
-            "pcpn": "0.1",
-            "pop": "43",
-            "pres": "1006",
-            "tmp": {
-              "max": "33",
-              "min": "23"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "210",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "1"
-            }
-          },
-          {
-            "astro": {
-              "sr": "04:58",
-              "ss": "19:42"
-            },
-            "cond": {
-              "code_d": "104",
-              "code_n": "104",
-              "txt_d": "阴",
-              "txt_n": "阴"
-            },
-            "date": "2016-07-15",
-            "hum": "28",
-            "pcpn": "1.2",
-            "pop": "78",
-            "pres": "1003",
-            "tmp": {
-              "max": "32",
-              "min": "22"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "74",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "5"
-            }
-          },
-          {
-            "astro": {
-              "sr": "04:59",
-              "ss": "19:41"
-            },
-            "cond": {
-              "code_d": "302",
-              "code_n": "302",
-              "txt_d": "雷阵雨",
-              "txt_n": "雷阵雨"
-            },
-            "date": "2016-07-16",
-            "hum": "26",
-            "pcpn": "0.0",
-            "pop": "19",
-            "pres": "1001",
-            "tmp": {
-              "max": "30",
-              "min": "22"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "161",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "7"
-            }
-          },
-          {
-            "astro": {
-              "sr": "05:00",
-              "ss": "19:40"
-            },
-            "cond": {
-              "code_d": "302",
-              "code_n": "101",
-              "txt_d": "雷阵雨",
-              "txt_n": "多云"
-            },
-            "date": "2016-07-17",
-            "hum": "33",
-            "pcpn": "0.1",
-            "pop": "48",
-            "pres": "1004",
-            "tmp": {
-              "max": "28",
-              "min": "21"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "219",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "4"
-            }
-          },
-          {
-            "astro": {
-              "sr": "05:01",
-              "ss": "19:40"
-            },
-            "cond": {
-              "code_d": "101",
-              "code_n": "104",
-              "txt_d": "多云",
-              "txt_n": "阴"
-            },
-            "date": "2016-07-18",
-            "hum": "29",
-            "pcpn": "0.1",
-            "pop": "48",
-            "pres": "1001",
-            "tmp": {
-              "max": "30",
-              "min": "22"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "184",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "4"
-            }
-          },
-          {
-            "astro": {
-              "sr": "05:01",
-              "ss": "19:39"
-            },
-            "cond": {
-              "code_d": "104",
-              "code_n": "104",
-              "txt_d": "阴",
-              "txt_n": "阴"
-            },
-            "date": "2016-07-19",
-            "hum": "30",
-            "pcpn": "0.4",
-            "pop": "46",
-            "pres": "1001",
-            "tmp": {
-              "max": "30",
-              "min": "22"
-            },
-            "vis": "10",
-            "wind": {
-              "deg": "211",
-              "dir": "无持续风向",
-              "sc": "微风",
-              "spd": "5"
-            }
-          }
-        ],
-        "hourly_forecast": [
-          {
-            "date": "2016-07-13 10:00",
-            "hum": "37",
-            "pop": "0",
-            "pres": "1005",
-            "tmp": "35",
-            "wind": {
-              "deg": "40",
-              "dir": "东北风",
-              "sc": "微风",
-              "spd": "5"
-            }
-          },
-          {
-            "date": "2016-07-13 13:00",
-            "hum": "26",
-            "pop": "0",
-            "pres": "1004",
-            "tmp": "39",
-            "wind": {
-              "deg": "73",
-              "dir": "东北风",
-              "sc": "微风",
-              "spd": "6"
-            }
-          },
-          {
-            "date": "2016-07-13 16:00",
-            "hum": "23",
-            "pop": "0",
-            "pres": "1003",
-            "tmp": "39",
-            "wind": {
-              "deg": "73",
-              "dir": "东北风",
-              "sc": "微风",
-              "spd": "5"
-            }
-          },
-          {
-            "date": "2016-07-13 19:00",
-            "hum": "29",
-            "pop": "0",
-            "pres": "1004",
-            "tmp": "37",
-            "wind": {
-              "deg": "212",
-              "dir": "西南风",
-              "sc": "微风",
-              "spd": "7"
-            }
-          },
-          {
-            "date": "2016-07-13 22:00",
-            "hum": "36",
-            "pop": "0",
-            "pres": "1005",
-            "tmp": "35",
-            "wind": {
-              "deg": "225",
-              "dir": "西南风",
-              "sc": "微风",
-              "spd": "10"
-            }
-          }
-        ],
-        "now": {
-          "cond": {
-            "code": "100",
-            "txt": "晴"
-          },
-          "fl": "32",
-          "hum": "60",
-          "pcpn": "0",
-          "pres": "1005",
-          "tmp": "28",
-          "vis": "10",
-          "wind": {
-            "deg": "330",
-            "dir": "西南风",
-            "sc": "3-4",
-            "spd": "14"
-          }
-        },
-        "status": "ok",
-        "suggestion": {
-          "comf": {
-            "brf": "很不舒适",
-            "txt": "白天天气晴好，但烈日炎炎会使您会感到很热，很不舒适。"
-          },
-          "cw": {
-            "brf": "较适宜",
-            "txt": "较适宜洗车，未来一天无雨，风力较小，擦洗一新的汽车至少能保持一天。"
-          },
-          "drsg": {
-            "brf": "炎热",
-            "txt": "天气炎热，建议着短衫、短裙、短裤、薄型T恤衫等清凉夏季服装。"
-          },
-          "flu": {
-            "brf": "少发",
-            "txt": "各项气象条件适宜，发生感冒机率较低。但请避免长期处于空调房间中，以防感冒。"
-          },
-          "sport": {
-            "brf": "较适宜",
-            "txt": "天气较好，户外运动请注意防晒。推荐您进行室内运动。"
-          },
-          "trav": {
-            "brf": "一般",
-            "txt": "天气较好，同时又有微风伴您一路同行，但是比较热，外出旅游请注意防晒，并注意防暑降温。"
-          },
-          "uv": {
-            "brf": "强",
-            "txt": "紫外线辐射强，建议涂擦SPF20左右、PA++的防晒护肤品。避免在10点至14点暴露于日光下。"
-          }
-        }
-      }
-    ]
-  }
-
   fetchWeather(city) {
     let today = Math.ceil(new Date().getTime()/1000/60/60/24);
-    this.setState({
-      weather: this.data['HeWeather data service 3.0'][0]
-    });
 
-    return false;
     fetch('http://apis.baidu.com/heweather/weather/free?city=' + city || this.state.city, {
       method: 'POST',
       headers:{
@@ -490,16 +145,13 @@ export default class Mess extends Component {
       return response.json();
     }).then(json => {
       let data = json['HeWeather data service 3.0'][0];
-      console.log(today, city, data);
       if(json && data){
         this.setState({
           weather: data
         });
-
-        this.props.onAlreadyGetData();
       }
     }).catch(err => {
-      console.warn(err);
+      console.log(err);
     });
   }
 
@@ -546,14 +198,12 @@ export default class Mess extends Component {
   }
 
   _onJumpWeatherPage() {
-    console.log('_onJumpWeatherPage');
     this.props.onJumpWeatherPage(this.state.weather.daily_forecast);
   }
 
   weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
   render() {
-
     let {year, month, day, date} = this.props.date;
     let weather = this.state.weather;
     let max = '', min = '';
@@ -589,7 +239,7 @@ export default class Mess extends Component {
                 underlayColor="rgba(255, 255, 255, 0.6)"
                 style={[styles.hdBottomItem]}
               >
-                <Text style={[{paddingTop: 18, fontSize: 18, color: 'red'}]}>
+                <Text style={[{fontSize: 18, color: 'red'}]}>
                   确定
                 </Text>
               </TouchableHighlight>
@@ -603,10 +253,13 @@ export default class Mess extends Component {
             underlayColor="rgba(255, 255, 255, 0.6)"
           >
             <View style={styles.hdTop}>
-              <Image
-                source={{uri: weatherPic}}
-                style={styles.weatherPic}
-              />
+              {
+                weatherPic !== '' &&  <Image
+                  source={{uri: weatherPic}}
+                  style={styles.weatherPic}
+                />
+              }
+
               <Text style={styles.textLarge}>
                 { max + '° ~' + min + '°' }
               </Text>
@@ -717,7 +370,6 @@ export default class Mess extends Component {
             activeOpacity={.8}
             style={styles.date}
             onPress={this._onJumpWeatherPage.bind(this)}
-            //onPress={() => console.log('press')}
             underlayColor="rgba(255, 255, 255, 0.6)"
           >
             <View style={styles.flexColumn}>
@@ -740,7 +392,7 @@ export default class Mess extends Component {
               underlayColor="rgba(255, 255, 255, 0.6)"
             >
               <View>
-                <Ball />
+                <Ball ball={this.props.ball}/>
               </View>
             </TouchableHighlight>
           </View>
@@ -843,8 +495,10 @@ const styles = StyleSheet.create({
   modalCity: {
     width: width,
     height: height/3,
+    padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,1)'
   },
   bottomIos: {
@@ -854,8 +508,6 @@ const styles = StyleSheet.create({
   cityPick: {
     flexDirection: 'row',
     alignItems: 'center',
-    //paddingLeft: 6,
-    //paddingRight: 6,
   },
   cityPic: {
     width: 12,
