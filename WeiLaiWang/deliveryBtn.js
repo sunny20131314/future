@@ -6,7 +6,6 @@
 
 import React, { Component } from 'react';
 import {
-  BackAndroid,
   StyleSheet,
   Alert,
   TouchableHighlight,
@@ -46,7 +45,6 @@ class DeliveryBtn extends Component {
 
   _onClick() {
     let id = this.props.id;
-    console.log(id);
     this.props.setType( id );
   }
 }
@@ -76,12 +74,7 @@ export default class DeliveryBtnCon extends Component {
   }
 
   componentWillMount() {
-    if ( global.isIos ) return;
 
-    // 天气, 编辑, 日历, webview!
-    this.backListener = BackAndroid.addEventListener('hardwareBackPress', function () {
-      return true;
-    });
   }
 
   _onSearchDelivery(val) {
@@ -95,35 +88,9 @@ export default class DeliveryBtnCon extends Component {
     });
   }
 
-  //_onBlur() {
-  //  console.log(this.props.scrollLayout);
-  //  this.setState({
-  //    marginBottom: 0,
-  //  });
-  //  setTimeout( () => {
-  //    this.props.scrollView.scrollTo({x: 0,y: this.props.scrollLayout, animated: true})
-  //  }, 300)
-  //}
-  //
-  //_onFocus() {
-  //  console.log(this.scrollLayout, 'onFocus');
-  //  this.setState({
-  //    marginBottom: 180,
-  //  });
-  //
-  //  setTimeout( () => {
-  //    this.props.scrollView.scrollTo({x: 0,y: this.scrollLayout, animated: true})
-  //  }, 300)
-  //}
-
   render() {
     return (
-      <View
-        //onLayout={(e) => {
-        //console.log(e.nativeEvent.layout.y, 'view');
-        //this.scrollLayout = e.nativeEvent.layout.y;
-      //}}
-      >
+      <View>
         <SearchComponent
           placeholder="请输入快递单号..."
           keyboardType='numeric'

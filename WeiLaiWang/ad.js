@@ -25,7 +25,7 @@ export default class Ad extends Component {
       <View style={[styles.header, this.props.style]}>
         <TouchableHighlight
           activeOpacity={.8}
-          onPress={() => console.log('press')}
+          //onPress={() => console.log('press')}
           underlayColor="rgba(255, 255, 255, 0.5)"
         >
           <Image

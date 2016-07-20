@@ -30,8 +30,6 @@ export default class SearchComponent extends Component {
           placeholder={this.props.placeholder}
           value={this.state.text}
           keyboardType={this.props.keyboardType}
-          //onFocus={this.props.onFocus && this.props.onFocus}
-          //onBlur={this.props.onBlur && this.props.onBlur}
           onChangeText={(text) => this.setState({text})}
           onSubmitEditing={this._submit.bind(this)}
           multiline={false}
@@ -40,7 +38,7 @@ export default class SearchComponent extends Component {
         <TouchableHighlight
           activeOpacity={.8}
           onPress={this._submit.bind(this)}
-          underlayColor="rgba(255, 255, 255, 0.6)"
+          underlayColor="rgba(245, 79, 69, 0.8)"
           style={styles.searchBtn}
         >
           <Image

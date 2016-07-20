@@ -48,7 +48,7 @@ export default class SearchComponent extends Component {
         <TouchableHighlight
           activeOpacity={.8}
           onPress={this._submit.bind(this)}
-          underlayColor="rgba(255, 255, 255, 0.6)"
+          underlayColor="rgba(245, 79, 69, 0.8)"
           style={styles.searchBtn}
         >
           <Image

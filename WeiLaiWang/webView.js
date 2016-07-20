@@ -59,8 +59,14 @@ export default class WebViewCom extends Component {
     //);
   }
 
+  goReturn() {
+    // 主页webview 返回上一页面,
+    this.props.linkReturn && this.props.linkReturn();
+    this.navigator.pop();
+  }
+
   goBack() {
-    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.navigator.pop();
+    this.state.backButtonEnabled ? this.refs['webview'].goBack() : this.goReturn();
   }
 
   onShouldStartLoadWithRequest(event) {

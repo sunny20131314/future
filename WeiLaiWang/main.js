@@ -101,27 +101,51 @@ export default class Main extends Component {
 
   url = 'http://m.k618.cn/dhy_news/';  //新闻页面的地址
 
+  async _keepData(data) {
+    await AsyncStorage.setItem('appData', JSON.stringify(data));
+  }
+
   async _loadInitialState() {
     try {
-      var value = await AsyncStorage.getItem('appDataOrders');
-      value = JSON.parse(value);
-      if (value !== null){
-        this.setState({appDataOrders: value});
-      } else {
-        // tab页数据的排列顺序
-        let appDataOrders = [];
-        for(let m = 0, len = appData.length; m !== len; m++ ){
-          let tab = appData[m].data;   // 每个tab页的数据
-          let tabIndex = appDataOrders[m] = []; // 传递每一个tab的数据
+      await AsyncStorage.getItem('appDataOrders')
+        .then(res => JSON.parse(res))
+        .then(json => {
+          if (json !== null){
+            this.setState({appDataOrders: json});
+          } else {
+            // tab页数据的排列顺序
+            let appDataOrders = [];
+            for(let m = 0, len = appData.length; m !== len; m++ ){
+              let tab = appData[m].data;   // 每个tab页的数据
+              let tabIndex = appDataOrders[m] = []; // 传递每一个tab的数据
 
-          let indexLen = tab.length;
-          for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
-            tabIndex[n] = Object.keys(tab[n]);   // 保存全部数据的顺序
+              let indexLen = tab.length;
+              for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
+                tabIndex[n] = Object.keys(tab[n]);   // 保存全部数据的顺序
+              }
+            }
+            this.setState({appDataOrders: appDataOrders});
+            this._keepData(appDataOrders);
           }
-        }
-        this.setState({appDataOrders: appDataOrders});
-        await AsyncStorage.setItem('appData', JSON.stringify(appDataOrders));
-      }
+        });
+      //var value = await AsyncStorage.getItem('appDataOrders');
+//if (value !== null){
+      //  this.setState({appDataOrders: value});
+      //} else {
+      //  // tab页数据的排列顺序
+      //  let appDataOrders = [];
+      //  for(let m = 0, len = appData.length; m !== len; m++ ){
+      //    let tab = appData[m].data;   // 每个tab页的数据
+      //    let tabIndex = appDataOrders[m] = []; // 传递每一个tab的数据
+      //
+      //    let indexLen = tab.length;
+      //    for(let n = 0; n !== indexLen; n++){ //每个tab的每页: 生成相关数据!
+      //      tabIndex[n] = Object.keys(tab[n]);   // 保存全部数据的顺序
+      //    }
+      //  }
+      //  this.setState({appDataOrders: appDataOrders});
+      //  await AsyncStorage.setItem('appData', JSON.stringify(appDataOrders));
+      //}
     } catch (error) {
       console.log(error);
     }
@@ -288,26 +312,40 @@ export default class Main extends Component {
     }, 800);
   }
 
+  linkReturn() {
+    this.WebViewNews.goBack();
+    // 解决webview跳转过程中的页面显示
+    setTimeout( () => {
+      this.refs.webview.setNativeProps({style: {opacity: 1}});
+    }, 500);
+  }
+
   _onNavigationStateChange(nav) {
     let url = nav.url;
 
     // ios: nav.navigationType = other/ click
     // android: nav.loading = true (2) false
-    let len = this.navigator.getCurrentRoutes().length;
-    if( url === this.url || !this.navigator || len > 1) {
+    let navigator = this.navigator;
+    let len = navigator.getCurrentRoutes().length;
+    if( url === this.url || !navigator || len > 1) {
       return false;
     }
+    this.refs.webview.setNativeProps({style: {opacity: 0}});
 
     if ( isIos && nav.navigationType || !isIos && !nav.canGoBack && nav.loading ) {
-      this.refs.webview.setNativeProps({style: {opacity: 0}});
-      this._onJump( url );
-      this.WebViewNews.goBack();
-
-      // 解决webview跳转过程中的页面显示
-      setTimeout( () => {
-        this.refs.webview.setNativeProps({style: {opacity: 1}});
-      }, 1000)
+      if(navigator) {
+        navigator.push({
+          name: 'webView',
+          component: WebViewCom,
+          params: {
+            url,
+            linkReturn: this.linkReturn.bind(this)
+          },
+          handleBack: ''
+        })
+      }
     }
+    this.WebViewNews.goBack();
   }
 
   render() {
