@@ -1,6 +1,3 @@
-/*
-* 目前暂未得知 数组的顺序是何时改变的
-* */
 import React from 'react';
 import TimerMixin from 'react-timer-mixin';
 import {
@@ -23,9 +20,7 @@ var Row = React.createClass({
   },
   handleLongPress: function(e) {
     this.refs.view.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
-      // 计算指定视图在屏幕上显示的位置和尺寸，通过一个异步回调返回计算的结果。如果成功，回调函数会被调用，并带有以下参数：：
       let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-      // 传递给active, 计算出hover的位置
       this.props.onRowActive({
         layout: layout,
         touch: e.nativeEvent,
@@ -41,28 +36,12 @@ var Row = React.createClass({
     //let activeData = this.props.list.state.active;
     //let activeIndex = activeData ? Number(activeData.rowData.index) : -5;
     //let shouldDisplayHovering = activeIndex !== Number(this.props.rowData.index);
-
     let Row = React.cloneElement(
-      this.props.renderRow(
-        this.props.rowData.data,
-        this.props.rowData.section,
-        this.props.rowData.index,
-        null,
-        this.props.active
-      ),
-      {
-        // 为什么方法不能直接传过来???
-        sortHandlers: {
-          onLongPress: this.handleLongPress,
-          onPressOut: this.props.list.cancel
-        },
-        //onLongPress: this.handleLongPress,
-        //onPressOut: this.props.list.cancel
-      }
-    );
-
+      this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active),
+        {sortHandlers: {onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel},
+        onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel});
     return <View onLayout={this.props.onRowLayout}
-                 style={[this.props.imgLayout, this.props.active && this.props.list.state.hovering && {height: .01, opacity: 0}]}
+                 style={[this.props.active && this.props.list.state.hovering ? {height: 0.01, opacity: 0} : this.props.imgLayout]}
                  ref="view">
           {this.props.active && this.props.list.state.hovering && this.props._legacySupport ? null : Row}
         </View>
@@ -73,7 +52,7 @@ var SortRow = React.createClass({
   getInitialState: function() {
     let layout = this.props.list.state.active.layout;
     let wrapperLayout = this.props.list.wrapperLayout;
-    //console.log(  layout.pageX - wrapperLayout.pageX, layout.pageY - wrapperLayout.pageY, 'marginLeft, marginTop');
+
     return {
       style: {
         position: 'absolute',
@@ -109,14 +88,13 @@ var SortableListView = React.createClass({
         return r1 !== r2;
       }}),
       active: false,
-      // 当前hover的元素的index
       hovering: false,
       pan: new Animated.ValueXY(currentPanValue)
     };
 
     this.listener = this.state.pan.addListener(e => this.panY = e.y);
     let onPanResponderMoveCb = Animated.event([null, {
-           dx: this.state.pan.x, // x, y are Animated.Value
+           dx: this.state.pan.x, // x,y are Animated.Value
            dy: this.state.pan.y,
       }]);
 
@@ -149,7 +127,7 @@ var SortableListView = React.createClass({
       },
       onPanResponderRelease: (e) => {
         this.moved = false;
-        this.props.onMoveEnd && this.props.onMoveEnd(e);
+        this.props.onMoveEnd && this.props.onMoveEnd();
         if (!this.state.active) {
           if (this.state.hovering) this.setState({hovering: false});
           this.moveX = null;
@@ -159,7 +137,6 @@ var SortableListView = React.createClass({
         let itemHeight = this.state.active.layout.frameHeight;
         let fromIndex = this.order.indexOf(this.state.active.rowData.index);
         let toIndex = this.state.hovering === false ?  fromIndex : Number(this.state.hovering);
-
         let up = toIndex > fromIndex;
         if (up) {
           toIndex--;
@@ -171,8 +148,6 @@ var SortableListView = React.createClass({
           to: toIndex
         };
 
-        console.log(args);
-        console.log( fromIndex, this.state.hovering, toIndex );
         this.props.onRowMoved && this.props.onRowMoved(args);
         if (this.props._legacySupport) { //rely on parent data changes to set state changes
           //LayoutAnimation.easeInEaseOut()
@@ -219,7 +194,7 @@ var SortableListView = React.createClass({
 
   },
   scrollValue: 0,
-  scrollContainerHeight: HEIGHT * 2, //Gets calculated on scroll, but if you havent scrolled needs an initial value
+  scrollContainerHeight: HEIGHT * 1.2, //Gets calculated on scroll, but if you havent scrolled needs an initial value
   scrollAnimation: function() {
     if (this.isMounted() && this.state.active) {
       if (this.moveY == undefined) return this.requestAnimationFrame(this.scrollAnimation);
@@ -296,11 +271,7 @@ var SortableListView = React.createClass({
     }
 
   },
-
-
-  // 记录位移!
   layoutMap: {},
-  // 把所有的 ref 记录!
   _rowRefs: {},
   handleRowActive: function(row) {
     this.state.pan.setValue({x: 0, y: 0});
@@ -312,31 +283,25 @@ var SortableListView = React.createClass({
       if(this.order[i] === row.rowData.index)
         hoveringIndex = i;
     };
-    //console.log(hoveringIndex, 'hoveringIndex');
     this.setState({
       active: row,
       hovering: hoveringIndex,
     },  this.scrollAnimation);
 
   },
-  // 类似占位 ?
   renderActiveDivider: function() {
-    let height = this.state.active ? this.state.active.layout.frameHeight : null;
+    let height = this.state.active ? this.state.active.layout.frameHeight : null
     if (this.props.renderActiveDivider) return this.props.renderActiveDivider(height);
     return <View style={{height: height}} />
   },
   renderRow: function(data, section, index, highlightfn, active) {
     //console.log(index, active);
-    // SortRow ? 是新添加的那个浮层...
     let Component = active ? SortRow : Row;
-    active && console.log('SortRow');
-
     let isActiveRow = (!active && this.state.active && this.state.active.rowData.index === index);
     if (!active && isActiveRow) {
       active = {active: true};
     }
     let hoveringIndex = this.order[this.state.hovering];
-    // -- Component组件中 方法 renderRow(组件SortableListView 上的props 传过来的) 是传给下面组件使用的 囧... 终于搞清楚了...
     return <Component
       {...this.props}
       activeDivider={this.renderActiveDivider()}
@@ -348,9 +313,7 @@ var SortableListView = React.createClass({
       panResponder={this.state.panResponder}
       rowData={{data, section, index}}
       onRowActive={this.handleRowActive}
-      onRowLayout={layout => {
-        this.layoutMap[index] = layout.nativeEvent.layout;
-      }}/>
+      onRowLayout={layout => this.layoutMap[index] = layout.nativeEvent.layout}/>
   },
   renderActive: function() {
     if (!this.state.active) return;
@@ -371,7 +334,6 @@ var SortableListView = React.createClass({
   },
   render: function() {
     let dataSource = this.state.ds.cloneWithRows(this.props.data, this.order);
-    // 看不懂这里的 renderRow 和props传递的 renderRow 区别和联系 --
     return <View ref="wrapper" style={{flex: 1}} onLayout={()=>{}}>
       <ListView
         contentContainerStyle={this.props.styles}
@@ -383,7 +345,7 @@ var SortableListView = React.createClass({
         initialListSize={this.props.order.length}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
-          this.props.onScroll && this.props.onScroll(e);
+          if (this.props.onScroll) this.props.onScroll(e);
         }}
         onContentSizeChange={(width, height) => {
           this.scrollContainerHeight = height;

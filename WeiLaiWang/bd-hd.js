@@ -62,6 +62,8 @@ class Ball extends Component {
   }
 
   fetchBallData() {
+    // --
+    return false;
     fetch('http://f.apiplus.cn/ssq-1.json', {
       method: 'GET'
     }).then(response => {
@@ -134,8 +136,9 @@ export default class Mess extends Component {
   }
 
   fetchWeather(city) {
-    let today = Math.ceil(new Date().getTime()/1000/60/60/24);
-
+    let today = Math.ceil(new Date().getTime()/86400000);
+    // --
+    return false;
     fetch('http://apis.baidu.com/heweather/weather/free?city=' + city || this.state.city, {
       method: 'POST',
       headers:{

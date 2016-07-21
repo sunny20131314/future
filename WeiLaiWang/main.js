@@ -156,7 +156,7 @@ export default class Main extends Component {
     this._loadInitialState();
 
     NetInfo.isConnected.fetch().done((isConnected) => {
-      !isConnected && alert('没有联网(⊙o⊙),请连接网络~~~');
+      !isConnected && alert('目前没有网络,请连接网络~~~');
     });
 
     this.listenBack = BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid.bind(this));
@@ -182,7 +182,7 @@ export default class Main extends Component {
       return handleBack();
     }
 
-    //// 如果没有handleBack事件, pop or exit
+    // 如果没有handleBack事件, pop or exit
     if (len > 1) {
       this.navigator.pop();
       return true;
