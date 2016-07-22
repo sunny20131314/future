@@ -20,7 +20,6 @@ import {
   View
 } from 'react-native';
 import Main from './main';
-alert(1);
 let isIos = Platform.OS === 'ios';
 let SortableListView = require('./SortableListView');
 
@@ -142,8 +141,8 @@ export default class MyComponent extends Component {
           imgLayout={this.imgLayout}
           onRowMoved={ e => {
                 //this.order.splice(e.to, 0, this.order.splice(e.from, 1)[0]);
-                console.log(this.order);
-                this.forceUpdate();
+                //console.log(this.order);
+                //this.forceUpdate();
               }}
           scrollEnabled={true}
           renderRow={row => <RowComponent data={row} imgLayout={this.imgLayout} />}

@@ -34,6 +34,9 @@ import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 let appData = require('./appData');
 
+// --
+let reduxTouch = require('./redux-touch');
+
 import ViewPager from './viewpager';
 
 // 计算每个image的大小,高宽和图等比例!
