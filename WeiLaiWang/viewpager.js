@@ -185,7 +185,8 @@ export default class ViewPager extends Component {
             <Image
               source={dataEnd[d].url}
               style={this.imgLayout}
-              resizeMode='contain'
+              resizeMode={Image.resizeMode.contain}
+              //resizeMode='contain'
             />
           </TouchableHighlight>
           )
