@@ -24,19 +24,6 @@ let regionText = {
   longitudeDelta: '0'
 };
 
-// -- del
-var a =  <MapRegionInput
-  onChange={(region) => {
-            console.log( 'MapViewExample', region );
-            this.setState({
-              mapRegion: region,
-              mapRegionInput: region,
-              annotations: this._getAnnotations(region)
-            });
-          }}
-  region={this.state.mapRegionInput}
-/>;
-
 class MapRegionInput extends Component {
   constructor(props){
     super(props);
@@ -279,7 +266,7 @@ export default class MapViewExample extends Component {
 
 var styles = StyleSheet.create({
   map: {
-    height: 500,
+    height: 300,
     margin: 6,
     borderWidth: 1,
     borderColor: '#000000'

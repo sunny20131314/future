@@ -13,13 +13,12 @@ import {
 } from 'react-native';
 
 import Main from './main';
-import MapViewExample from './mapView';
 
 export default class RouteComponent extends Component {
   render() {
     return (
       <Navigator
-        initialRoute={{ name: 'MapViewExample', component: MapViewExample}}
+        initialRoute={{ name: 'Main', component: Main}}
         //configureScene={(route) => {
         //        return Navigator.SceneConfigs.HorizontalSwipeJumpFromRight;
         //      }}
