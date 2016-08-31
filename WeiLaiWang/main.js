@@ -33,7 +33,6 @@ import SearchComponent from './search';
 import DeliveryBtnCon from './deliveryBtn';
 import BdBtm from './bd-btm';
 let appData = require('./appData');
-import MapViewExample from './mapView';
 
 
 import ViewPager from './viewpager';
@@ -492,7 +491,6 @@ export default class Main extends Component {
             onSearch={this._onJump.bind(this)}
           />
           <Ad />
-          <MapViewExample />
           <BdBtm />
         </ScrollView>
         {
