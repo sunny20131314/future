@@ -6,3 +6,7 @@
 
 # 忽略私有文件 private
 private
+
+android/keystores/debug.keystore
+
+*/my-release-key.keystore
